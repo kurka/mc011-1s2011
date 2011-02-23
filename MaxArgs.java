@@ -9,7 +9,7 @@ public class MaxArgs {
    * @param prog
    * @return maximum number of args of "print" statements
    */
-  int maxargs(SLL.Stm prog) {
+  int maxargs(Stm prog) {
     return 0;
   }
 }
