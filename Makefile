@@ -2,4 +2,4 @@ all:
 	javac *.java */*.java
 
 clean:
-	rm *.class */*.class
+	rm --force *.class */*.class
