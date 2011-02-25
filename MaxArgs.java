@@ -18,7 +18,7 @@ public class MaxArgs {
   /**
    * PrintStm args counter
    */
-  private int max = 0;
+  private static int max = 0;
 
   /**
    * @param prog
@@ -38,6 +38,7 @@ public class MaxArgs {
   }
 
   static void openCompoundStm(Stm prog){
+    System.out.println("CompoundStm");
     CompoundStm comp = (CompoundStm) prog;
 	//analyse stm1
 	openStm(comp.stm1);
@@ -47,14 +48,17 @@ public class MaxArgs {
   }
 
   static void openAssignStm(Stm prog){
-    AssignStm assign = (AssignStm) prog;
-	//ignore id (just a id)
+	AssignStm assign = (AssignStm) prog;
+    
+	System.out.println("AssignStm");
+    System.out.println(assign.id);
 	
     //analyse exp
     openExp(assign.exp);
   }
   
   static void openPrintStm(Stm prog){
+    System.out.println("PrintStm");
     PrintStm print = (PrintStm) prog;
 	//TODO: CONTAR O BAGUIO!
     //getLen(ExpList prog.expList)
@@ -75,30 +79,36 @@ public class MaxArgs {
 
   static void openIdExp(Exp prog){
 	IdExp idExp = (IdExp) prog;
-    //prog.id
+    //idExp.id
+    System.out.println(idExp.id);
 	return;
   }
   
   static void openNumExp(Exp prog){
 	NumExp numExp = (NumExp) prog;
-    //prog.num
+    //numExp.num
+    System.out.println(numExp.num);
 	return;
   }
   
   static void openOpExp(Exp prog){
+    System.out.println("OpExp");
 	OpExp oper = (OpExp) prog;
     //analyse left
     openExp(oper.left);
 	//analyse operator 
 	//oper.oper (int)
+    System.out.println(oper.oper);
 	//analyse right
 	openExp(oper.right);	
   }
   
   static void openEseqExp(Exp prog){
+	System.out.println("EseqExp");
 	EseqExp eseq = (EseqExp) prog;
 	//analyse statement
 	openStm(eseq.stm);
+    System.out.println("igual");
 	//analyse expression
 	openExp(eseq.exp);
   }
@@ -112,14 +122,18 @@ public class MaxArgs {
   }
 
   static void openPairExpList(ExpList prog){
+	System.out.println("PairExpList");
 	PairExpList pair = (PairExpList) prog;
   	//analyse head
+	System.out.println("head");
 	openExp(pair.head);
 	//analyse tail
+	System.out.println("tail");
 	openExpList(pair.tail);
   }
 
   static void openLastExpList(ExpList prog){
+	System.out.println("LastExpList");
 	LastExpList last = (LastExpList) prog;
     //analyse head
 	openExp(last.head); 
