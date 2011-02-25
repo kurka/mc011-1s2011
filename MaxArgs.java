@@ -125,19 +125,34 @@ public class MaxArgs {
    * @return Stm object with program to be interpreted
    */
   public static Stm getObject(){
-    Stm prog = 
-		new CompoundStm(new AssignStm("a",
-					new OpExp(new NumExp(5),
-						OpExp.Plus, new NumExp(3))),
-				new CompoundStm(new AssignStm("b",
-						new EseqExp(new PrintStm(new PairExpList(new IdExp("a"),
-									new LastExpList(new OpExp(new IdExp("a"),
-											OpExp.Minus,new NumExp(1))))),
-							new OpExp(new NumExp(10), OpExp.Times,
-								new IdExp("a")))),
-					new PrintStm(new LastExpList(new IdExp("b")))));
+    Stm p1 = new CompoundStm(
+      new AssignStm(
+        "a",
+        new OpExp(
+          new NumExp(5), OpExp.Plus, new NumExp(3)
+        )
+      ),
+      new CompoundStm(
+        new AssignStm(
+          "b",
+          new EseqExp(
+            new PrintStm(
+              new PairExpList(
+                new IdExp("a"), new LastExpList(
+                  new OpExp(new IdExp("a"), OpExp.Minus,new NumExp(1)
+                )
+              )
+            )
+          ),
+          new OpExp(
+            new NumExp(10), OpExp.Times, new IdExp("a")
+          )
+        )
+      ),
+      new PrintStm(new LastExpList(new IdExp("b"))))
+    );
     
-    return prog;
+    return p1;
   }
 }
 
