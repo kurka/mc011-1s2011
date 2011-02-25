@@ -8,22 +8,23 @@ public class MaxArgs {
     //create prog object here...
     //TODO: pass it through param
     Stm prog = getObject();
-    int max = maxargs(prog);
+    maxargs(prog);
     
-    system.out.println("resultado:");
-    system.out.println(max);
-    system.out.println("bye! :)");
+    System.out.println("resultado:");
+    System.out.println(max);
+    System.out.println("bye! :)");
   }
 
+  static int max=0;
   /**
    * @param prog
    * @return maximum number of args of "print" statements
    */
-  void maxargs(Stm prog) {
+  static void maxargs(Stm prog) {
     openStm(prog);
   }
 
-  void openStm(Stm Prog){
+  static void openStm(Stm prog){
     if(prog instanceof CompoundStm)
       openCompoundStm(prog);
     else if(prog instanceof AssignStm)
@@ -32,68 +33,109 @@ public class MaxArgs {
       openPrintStm(prog);
   }
 
-  void openCompoundStm(CompoundStm prog){
-    //analyse stm1
-    openStm(prog.stm1);
+  static void openCompoundStm(Stm prog){
+    CompoundStm comp = (CompoundStm) prog;
+	//analyse stm1
+	openStm(comp.stm1);
 
     //analyse stm2
-    openStm(prog.stm2);
+    openStm(comp.stm2);
   }
 
-  void openAssignStm(AssignStm prog){
-    //ignore id (just a id)
+  static void openAssignStm(Stm prog){
+    AssignStm assign = (AssignStm) prog;
+	//ignore id (just a id)
 	
     //analyse exp
-    openExp(Exp prog.exp);
+    openExp(assign.exp);
   }
   
-  void openPrintStm(PrintStm prog){
-    //TODO: CONTAR O BAGUIO!
+  static void openPrintStm(Stm prog){
+    PrintStm print = (PrintStm) prog;
+	//TODO: CONTAR O BAGUIO!
     //getLen(ExpList prog.expList)
     //analyse ExpList
-    openExpList(ExpList prog.exps);
+    openExpList(print.exps);
   }
 
-  void openExp(Exp prog){
+  static void openExp(Exp prog){
     if(prog instanceof IdExp)
       openIdExp(prog);
     else if(prog instanceof NumExp)
       openNumExp(prog);
     else if(prog instanceof OpExp)
-      OpenOpExp(prog);
+      openOpExp(prog);
     else if(prog instanceof EseqExp)
-      OpenEseqExp(prog);
+      openEseqExp(prog);
   }
 
-  //TODO: criar esses metodos
-  openIdExp
-    openNumExp
-    openOpExp
-    openEseqExp
-
-    void openExpList(ExpList prog){
-    //TODO
+  static void openIdExp(Exp prog){
+	IdExp idExp = (IdExp) prog;
+    //prog.id
+	return;
+  }
+  
+  static void openNumExp(Exp prog){
+	NumExp numExp = (NumExp) prog;
+    //prog.num
+	return;
+  }
+  
+  static void openOpExp(Exp prog){
+	OpExp oper = (OpExp) prog;
+    //analyse left
+    openExp(oper.left);
+	//analyse operator 
+	//oper.oper (int)
+	//analyse right
+	openExp(oper.right);	
+  }
+  
+  static void openEseqExp(Exp prog){
+	EseqExp eseq = (EseqExp) prog;
+	//analyse statement
+	openStm(eseq.stm);
+	//analyse expression
+	openExp(eseq.exp);
   }
 
-  // openPairExpList
-  //   openLastExpList
+  static void openExpList(ExpList prog){
+    if(prog instanceof PairExpList)
+		openPairExpList(prog);
+	else if(prog instanceof LastExpList)
+		openLastExpList(prog);
+	 
+  }
+
+  static void openPairExpList(ExpList prog){
+	PairExpList pair = (PairExpList) prog;
+  	//analyse head
+	openExp(pair.head);
+	//analyse tail
+	openExpList(pair.tail);
+  }
+
+  static void openLastExpList(ExpList prog){
+	LastExpList last = (LastExpList) prog;
+    //analyse head
+	openExp(last.head); 
+  }
 
   /**
    * @return Stm object with program to be interpreted
    */
   public static Stm getObject(){
-    SLL sll = new SLL();
     Stm prog = 
-      sll.new CompoundStm(sll.new AssignStm("a",
-                                            sll.new OpExp(sll.new NumExp(5),
-                                                          OpExp.Plus, sll.new NumExp(3))),
-                          sll.new CompoundStm(sll.new AssignStm("b",
-                                                                sll.new EseqExp(sll.new PrintStm(sll.new PairExpList(sll.new IdExp("a"),
-                                                                                                                     sll.new LastExpList(sll.new OpExp(sll.new IdExp("a"),
-                                                                                                                                                       OpExp.Minus,sll.new NumExp(1))))),
-                                                                                sll.new OpExp(sll.new NumExp(10), OpExp.Times,
-                                                                                              sll.new IdExp("a")))),
-                                              sll.new PrintStm(sll.new LastExpList(sll.new IdExp("b")))));
+		new CompoundStm(new AssignStm("a",
+					new OpExp(new NumExp(5),
+						OpExp.Plus, new NumExp(3))),
+				new CompoundStm(new AssignStm("b",
+						new EseqExp(new PrintStm(new PairExpList(new IdExp("a"),
+									new LastExpList(new OpExp(new IdExp("a"),
+											OpExp.Minus,new NumExp(1))))),
+							new OpExp(new NumExp(10), OpExp.Times,
+								new IdExp("a")))),
+					new PrintStm(new LastExpList(new IdExp("b")))));
     
     return prog;
   }
