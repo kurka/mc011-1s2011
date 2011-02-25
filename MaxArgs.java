@@ -14,8 +14,12 @@ public class MaxArgs {
     System.out.println(max);
     System.out.println("bye! :)");
   }
+  
+  /**
+   * PrintStm args counter
+   */
+  private int max = 0;
 
-  static int max=0;
   /**
    * @param prog
    * @return maximum number of args of "print" statements
