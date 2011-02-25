@@ -30,86 +30,76 @@ public class MaxArgs {
 
   static void openStm(Stm prog){
     if(prog instanceof CompoundStm)
-      openCompoundStm(prog);
+      openCompoundStm((CompoundStm) prog);
     else if(prog instanceof AssignStm)
-      openAssignStm(prog);
+      openAssignStm((AssignStm) prog);
     else if(prog instanceof PrintStm)
-      openPrintStm(prog);
+      openPrintStm((PrintStm) prog);
   }
 
-  static void openCompoundStm(Stm prog){
-    CompoundStm comp = (CompoundStm) prog;
+  static void openCompoundStm(CompoundStm prog){
 	//analyse stm1
-	openStm(comp.stm1);
+	openStm(prog.stm1);
 
     //analyse stm2
-    openStm(comp.stm2);
+    openStm(prog.stm2);
   }
 
-  static void openAssignStm(Stm prog){
-	AssignStm assign = (AssignStm) prog;
-    
+  static void openAssignStm(AssignStm prog){
     //analyse exp
-    openExp(assign.exp);
+    openExp(prog.exp);
   }
   
-  static void openPrintStm(Stm prog){
-    PrintStm print = (PrintStm) prog;
-	//TODO: CONTAR O BAGUIO!
-    //getLen(ExpList prog.expList)
+  static void openPrintStm(PrintStm prog){
     //analyse ExpList
-    openExpList(print.exps, 0);
+    openExpList(prog.exps, 0);
   }
 
   static void openExp(Exp prog){
     if(prog instanceof IdExp)
-      openIdExp(prog);
+      openIdExp((IdExp) prog);
     else if(prog instanceof NumExp)
-      openNumExp(prog);
+      openNumExp((NumExp) prog);
     else if(prog instanceof OpExp)
-      openOpExp(prog);
+      openOpExp((OpExp) prog);
     else if(prog instanceof EseqExp)
-      openEseqExp(prog);
+      openEseqExp((EseqExp) prog);
   }
 
-  static void openIdExp(Exp prog){
-	IdExp idExp = (IdExp) prog;
-    //idExp.id
+  static void openIdExp(IdExp prog){
+    //prog.id
 	return;
   }
   
-  static void openNumExp(Exp prog){
-	NumExp numExp = (NumExp) prog;
-    //numExp.num
+  static void openNumExp(NumExp prog){
+    //prog.num
 	return;
   }
   
-  static void openOpExp(Exp prog){
-	OpExp oper = (OpExp) prog;
+  static void openOpExp(OpExp prog){
     //analyse left
-    openExp(oper.left);
+    openExp(prog.left);
 	//analyse operator 
-	//oper.oper (int)
+	//prog.oper (int)
 	//analyse right
-	openExp(oper.right);	
+	openExp(prog.right);	
   }
   
-  static void openEseqExp(Exp prog){
-	EseqExp eseq = (EseqExp) prog;
+  static void openEseqExp(EseqExp prog){
 	//analyse statement
-	openStm(eseq.stm);
+	openStm(prog.stm);
 	//analyse expression
-	openExp(eseq.exp);
+	openExp(prog.exp);
   }
 
   static void openExpList(ExpList prog, int size){
 	if(prog instanceof PairExpList){
 	  size++;
-	  openPairExpList(prog, size);
+	  openPairExpList((PairExpList) prog, size);
 	}
 	else if(prog instanceof LastExpList){
 	  size++;
-	  openLastExpList(prog);
+	  openLastExpList((LastExpList) prog);
 	}
 	
 	if(size > max)
@@ -117,18 +107,16 @@ public class MaxArgs {
 	 
   }
 
-  static void openPairExpList(ExpList prog, int size){
-	PairExpList pair = (PairExpList) prog;
+  static void openPairExpList(PairExpList prog, int size){
   	//analyse head
-	openExp(pair.head);
+	openExp(prog.head);
 	//analyse tail
-	openExpList(pair.tail, size);
+	openExpList(prog.tail, size);
   }
 
-  static void openLastExpList(ExpList prog){
-	LastExpList last = (LastExpList) prog;
+  static void openLastExpList(LastExpList prog){
     //analyse head
-	openExp(last.head); 
+	openExp(prog.head); 
   }
 
   /**
