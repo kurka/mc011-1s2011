@@ -67,18 +67,18 @@ class Table {
     else {
       /* searched through entire table and didn't find */
       //TODO:
-	  //throw new CellNotFoundException();
-	  System.out.println("Ferrou! Nao achei!!!");
-	}
-	return -1;
-    
+      //throw new CellNotFoundException();
+      System.out.println("Ferrou! Nao achei!!!");
+    }
+    return -1;
+
   }
 }
 
 class IntAndTable {
   int i; 
   Table t;
-  
+
   IntAndTable(int ii, Table tt) {i=ii; t=tt;}
 }
 
@@ -92,8 +92,8 @@ public class Interpreter {
   }
 
   static void interp(Stm s){
-	Table t = interpStm(s,null);
-	t.print();
+    Table t = interpStm(s,null);
+    t.print();
   }
 
   static Table interpStm(Stm prog, Table t){
@@ -103,36 +103,36 @@ public class Interpreter {
       t = interpAssignStm((AssignStm) prog, t);
     else if(prog instanceof PrintStm)
       t = interpPrintStm((PrintStm) prog, t);
-	return t;
+    return t;
   }
 
   static Table interpCompoundStm(CompoundStm prog, Table t){
-	//analyse stm1
-	t = interpStm(prog.stm1, t);
+    //analyse stm1
+    t = interpStm(prog.stm1, t);
 
     //analyse stm2
     t = interpStm(prog.stm2, t);
-	return t;
+    return t;
   }
 
   static Table interpAssignStm(AssignStm prog, Table t){
     //prog.id = prog.exp
-	//analyse exp
-	IntAndTable i = new IntAndTable(0, t);
-	i = interpExp(prog.exp, i);
-	t = i.t;
-	if(t != null) //just updates if the table exists
-		t.update(prog.id, i.i);
-	else
-		t = new Table(prog.id, i.i, null);
-	return t;
+    //analyse exp
+    IntAndTable i = new IntAndTable(0, t);
+    i = interpExp(prog.exp, i);
+    t = i.t;
+    if(t != null) //just updates if the table exists
+      t.update(prog.id, i.i);
+    else
+      t = new Table(prog.id, i.i, null);
+    return t;
   }
-  
+
   static Table interpPrintStm(PrintStm prog, Table t){
-	//analyse ExpList
-	IntAndTable i = new IntAndTable(0, t);
+    //analyse ExpList
+    IntAndTable i = new IntAndTable(0, t);
     i = interpExpList(prog.exps, i);
-	return i.t;
+    return i.t;
   }
 
   static IntAndTable interpExp(Exp prog, IntAndTable i){
@@ -144,118 +144,118 @@ public class Interpreter {
       i = interpOpExp((OpExp) prog, i);
     else if(prog instanceof EseqExp)
       i = interpEseqExp((EseqExp) prog, i);
-	return i;
+    return i;
   }
 
   static IntAndTable interpIdExp(IdExp prog, IntAndTable i){
     //prog.id
-	i.i = i.t.get(prog.id);
-	return i;
+    i.i = i.t.get(prog.id);
+    return i;
   }
-  
+
   static IntAndTable interpNumExp(NumExp prog, IntAndTable i){
     //prog.num
-	i.i = prog.num;
-	return i;
+    i.i = prog.num;
+    return i;
   }
-  
+
 
   static IntAndTable interpOpExp(OpExp prog, IntAndTable i){
     //analyse left
-	int left, right;
+    int left, right;
     i = interpExp(prog.left, i);
-	//save expression result
-	left = i.i;
-	//analyse right
-	i = interpExp(prog.right, i);	
-	//save expression result
-	right = i.i;
+    //save expression result
+    left = i.i;
+    //analyse right
+    i = interpExp(prog.right, i);	
+    //save expression result
+    right = i.i;
 
-	//do the operation
-	//Plus=1, Minus=2, Times=3, Div=4;
-	if(prog.oper == 1)
-		i.i = left + right;
-	else if(prog.oper == 2)
-		i.i = left - right;
-	else if(prog.oper == 3)
-		i.i = left * right;
-	else if(prog.oper == 4)
-		i.i = left / right;
-	//TODO: usar switch?	
-	
-	return i;
+    //do the operation
+    //Plus=1, Minus=2, Times=3, Div=4;
+    if(prog.oper == 1)
+      i.i = left + right;
+    else if(prog.oper == 2)
+      i.i = left - right;
+    else if(prog.oper == 3)
+      i.i = left * right;
+    else if(prog.oper == 4)
+      i.i = left / right;
+    //TODO: usar switch?	
+
+    return i;
   }
-  
-  static IntAndTable interpEseqExp(EseqExp prog, IntAndTable i){
-	//analyse statement
-	i.t = interpStm(prog.stm, i.t);
-	//analyse expression
-	i = interpExp(prog.exp, i);
 
-	return i;
+  static IntAndTable interpEseqExp(EseqExp prog, IntAndTable i){
+    //analyse statement
+    i.t = interpStm(prog.stm, i.t);
+    //analyse expression
+    i = interpExp(prog.exp, i);
+
+    return i;
   }
 
   static IntAndTable interpExpList(ExpList prog, IntAndTable i){
-	if(prog instanceof PairExpList)
-	  i = interpPairExpList((PairExpList) prog, i);
-	else if(prog instanceof LastExpList)
-	  i = interpLastExpList((LastExpList) prog, i);
-	
-	return i;
+    if(prog instanceof PairExpList)
+      i = interpPairExpList((PairExpList) prog, i);
+    else if(prog instanceof LastExpList)
+      i = interpLastExpList((LastExpList) prog, i);
+
+    return i;
   }
 
   static IntAndTable interpPairExpList(PairExpList prog, IntAndTable i){
-  	//analyse head
-	i = interpExp(prog.head, i);
-	//print the expression result (this expression is inside print arguments)
-	System.out.println(">>>"+i.i);
-	//analyse tail
-	i = interpExpList(prog.tail, i);
+    //analyse head
+    i = interpExp(prog.head, i);
+    //print the expression result (this expression is inside print arguments)
+    System.out.println(">>>"+i.i);
+    //analyse tail
+    i = interpExpList(prog.tail, i);
 
-	return i;
+    return i;
   }
 
   static IntAndTable interpLastExpList(LastExpList prog, IntAndTable i){
     //analyse head
-	i = interpExp(prog.head, i); 
-	//print the expression result (this expression is inside print arguments)
-	System.out.println(">>>"+i.i);
-	
-	return i;
+    i = interpExp(prog.head, i); 
+    //print the expression result (this expression is inside print arguments)
+    System.out.println(">>>"+i.i);
+
+    return i;
   }
 
   /**
-   * @return Stm object with program to be interpreted
-   */
+    * @return Stm object with program to be interpreted
+    */
   static Stm getProgram(){
-	  Stm p = new CompoundStm(
-			  new AssignStm(
-				  "a",
-				  new OpExp(
-					  new NumExp(5), OpExp.Plus, new NumExp(3)
-					  )
-				  ),
-			  new CompoundStm(
-				  new AssignStm(
-					  "b",
-					  new EseqExp(
-						  new PrintStm(
-							  new PairExpList(
-								  new IdExp("a"), new LastExpList(
-									  new OpExp(new IdExp("a"), OpExp.Minus,new NumExp(1)
-										  )
-									  )
-								  )
-							  ),
-						  new OpExp(
-							  new NumExp(10), OpExp.Times, new IdExp("a")
-							  )
-						  )
-					  ),
-				  new PrintStm(new LastExpList(new IdExp("b"))))
-				  );
+    Stm p = new CompoundStm(
+        new AssignStm(
+          "a",
+          new OpExp(
+            new NumExp(5), OpExp.Plus, new NumExp(3)
+            )
+          ),
+        new CompoundStm(
+          new AssignStm(
+            "b",
+            new EseqExp(
+              new PrintStm(
+                new PairExpList(
+                  new IdExp("a"), new LastExpList(
+                    new OpExp(new IdExp("a"), OpExp.Minus,new NumExp(1)
+                      )
+                    )
+                  )
+                ),
+              new OpExp(
+                new NumExp(10), OpExp.Times, new IdExp("a")
+                )
+              )
+            ),
+          new PrintStm(new LastExpList(new IdExp("b"))))
+          );
 
-	return p;
+    return p;
   }
 
 }
