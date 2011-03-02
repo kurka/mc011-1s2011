@@ -11,6 +11,9 @@ Tokens
   r_par = ')';
   blank = (' ' | 13 | 10)+;
 
+Ignored Tokens
+ blank;
+
 
 Productions
   expr =
