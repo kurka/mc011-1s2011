@@ -57,7 +57,7 @@ class Table {
   }
 
   /* @return The value in cell identified by i. */
-  int get(String i){ //TODO: throws CellNotFoundException {
+  int get(String i) throws CellNotFoundException {
     if (id == i) {
       return value;
     }
@@ -66,12 +66,8 @@ class Table {
     }
     else {
       /* searched through entire table and didn't find */
-      //TODO:
-      //throw new CellNotFoundException();
-      System.out.println("Ferrou! Nao achei!!!");
+      throw new CellNotFoundException();
     }
-    return -1;
-
   }
 }
 
@@ -88,7 +84,6 @@ public class Interpreter {
     System.out.println("Starting...");
     Stm prog = getProgram();
     interp(prog); 
-    System.out.println("bye! :)");
   }
 
   static void interp(Stm s){
@@ -136,8 +131,15 @@ public class Interpreter {
   }
 
   static IntAndTable interpExp(Exp prog, IntAndTable i){
-    if(prog instanceof IdExp)
-      i = interpIdExp((IdExp) prog, i);
+    if(prog instanceof IdExp){
+      try{
+        i = interpIdExp((IdExp) prog, i);
+      }
+      catch(CellNotFoundException e){
+        System.out.println("ERROR! ID not found!");
+        System.exit(1);
+      }
+    }
     else if(prog instanceof NumExp)
       i = interpNumExp((NumExp) prog, i);
     else if(prog instanceof OpExp)
@@ -147,9 +149,10 @@ public class Interpreter {
     return i;
   }
 
-  static IntAndTable interpIdExp(IdExp prog, IntAndTable i){
+  static IntAndTable interpIdExp(IdExp prog, IntAndTable i) throws CellNotFoundException {
     //prog.id
     i.i = i.t.get(prog.id);
+    
     return i;
   }
 
