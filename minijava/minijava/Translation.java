@@ -1,6 +1,6 @@
-package postfix;
-import postfix.analysis.*;
-import postfix.node.*;
+package minijava;
+import minijava.analysis.*;
+import minijava.node.*;
 
 class Translation extends DepthFirstAdapter { 
 
