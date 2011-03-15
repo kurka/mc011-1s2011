@@ -18,9 +18,9 @@ Tokens
   this = 'this';
   new = 'new';
 
-  StringType = 'String';
-  intType = 'int';
-  booleanType = 'boolean';
+  string_type = 'String';
+  int_type = 'int';
+  boolean_type = 'boolean';
 
   if = 'if';
   else = 'else';
@@ -44,8 +44,8 @@ Tokens
   rparen = ')';
   
 
-  id = nondigit( digit|nondigit )*
-  num
+  id = nondigit (digit|nondigit)*;
+  num = digit*;
   op = ('&&' | '<' | '+' | '-' | '*'); /* nao tem !=, >, / ? */
 
   comment = '//' not_newline* 10 |
@@ -53,7 +53,8 @@ Tokens
   blank = (' ' | 13 | 9 | 10)+;
 
 Ignored Tokens
- blank;
+ blank,
  comment;
 
 //Productions
+
