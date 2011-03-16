@@ -45,7 +45,7 @@ Tokens
   
 
   id = nondigit (digit|nondigit)*;
-  num = digit*;
+  integer = digit*;
   op = ('&&' | '<' | '+' | '-' | '*'); /* nao tem !=, >, / ? */
 
   comment = '//' not_newline* 10 |
@@ -56,5 +56,67 @@ Ignored Tokens
   blank,
   comment;
 
-//Productions
 
+Productions
+  program = 
+    mainclass classdecl*;
+  
+  mainclass = 
+    class id lcurly public main lparen string_type lsquare rsquare id rparen lcurly statement rcurly rcurly;     
+  
+  classdecl = 
+    {simple_class} class id lcurly vardecl* methoddecl* rcurly |
+	{extended_class} class id extends id lcurly vardecl* methoddecl* rcurly;
+  
+  vardecl = 
+    type id;
+  
+  methoddecl = 
+    public type id lparen formallist rparen lcurly vardecl* statement* return exp semicolon rcurly;
+  
+  formallist = 
+    flist?;
+  
+  flist = 
+    type id formalrest*;
+  
+  formalrest = 
+    comma type id;
+
+  type =
+    {int_array_type} int_type lsquare rsquare |
+	{boolean_type} boolean_type |
+	{int_type} int_type |
+	{id_type} id
+
+  statement =
+    {statements} lcurly statement* rcurly |
+	{if} lparen exp rparen statement else statement |
+    {print} print lparen exp rparen semicolon |
+     {id_attribution} id equal exp semicolon |
+    {array_attribution} id lsquare exp rsquare equal exp semicolon;
+
+  exp =
+    {operation} exp op exp |
+	{array} exp lsquare exp rsquare |
+	{lenght} exp dot lenght |
+	{method} exp dot id lparen explist rparen |
+	{integer_literal} integer |
+	{true} true |
+	{false} false |
+	{id} id |
+	{this} this |
+	{new_int_array} new int_type lsquare exp rsquare |
+	{new_id} new id lparen rparen |
+	{not_expr} not exp |
+	{paren_expr} lparen exp rparen;
+	
+  explist =
+    elist?;
+
+  elist {explist} =
+    exp exprest*;
+    
+  exprest {exprest} =
+    comma exp; 
+    
