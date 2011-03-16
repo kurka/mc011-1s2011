@@ -29,8 +29,6 @@ Tokens
   lenght = 'lenght';
   semicolon = ';';
   comma = ',';
-  dot = '.';
-  not = '!';
   equal = '=';
 
   true = 'true';
@@ -46,7 +44,12 @@ Tokens
 
   id = nondigit (digit|nondigit)*;
   integer = digit*;
-  op = ('&&' | '<' | '+' | '-' | '*'); /* nao tem !=, >, / ? */
+  less = '<';
+  and = '&&';
+  addsub = ('+' | '-');
+  mul = '*';
+  dot = '.';
+  not = '!';
 
   comment = '//' not_newline* 10 |
             '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';
@@ -96,24 +99,49 @@ Productions
     {id_attribution} id equal exp semicolon |
     {array_attribution} id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon;
 
-  exp =
-	{integer_literal} integer exp_aux |
-	{true} true exp_aux |
-	{false} false exp_aux |
-	{id} id exp_aux |
-	{this} this exp_aux |
-	{new_int_array} new int_type lsquare exp rsquare exp_aux |
-	{new_id} new id lparen rparen exp_aux |
-	{not_expr} not exp exp_aux |
-	{paren_expr} lparen exp rparen exp_aux;
+  /*********************************************
+  ordem de precedencia das expressoes (http://www.uni-bonn.de/~manfear/javaoperators.php):
+  &&
+  <
+  + -
+  *
+  !
+  .
+  ()
+  []
+  **********************************************/
+  exp = and_exp;
 
-  exp_aux =
-    {operation} op exp exp_aux |
-	{array} lsquare exp rsquare exp_aux |
-	{lenght} dot lenght exp_aux |
-	{method} dot id lparen explist rparen exp_aux |
-	;
-	
+  and_exp =
+    less_exp {and and_exp}*;
+
+  less_exp =
+    addsub_exp (less less_exp)*;
+
+  addsub_exp =
+    mul_exp (addsub addsub_exp)*;
+
+  mul_exp =
+    dot_exp (mul mul_exp )*;
+
+  dot_exp =
+    {lenght} array_exp (dot lenght)? |
+	{method} array_exp (dot id lparen explist rparen)?;
+
+  array_exp =
+    final_exp (lsquare exp rsquare)?;
+
+  final_exp =
+	{integer_literal} integer |
+	{true} true |
+	{false} false |
+	{id} id |
+	{this} this |
+	{new_int_array} new int_type lsquare exp rsquare |
+	{new_id} new id lparen rparen |
+	{not_expr} not exp |
+	{paren_expr} lparen exp rparen;
+
   explist =
     elist?;
 
