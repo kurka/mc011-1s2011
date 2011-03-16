@@ -10,7 +10,7 @@ Helpers
   not_star_slash =  [not_star - '/'];
 
 Tokens
-  class = 'class';
+  tclass = 'class';
   main = 'static void main';
   extends = 'extends';
   public = 'public';
@@ -62,11 +62,11 @@ Productions
     mainclass classdecl*;
   
   mainclass = 
-    class id lcurly public main lparen string_type lsquare rsquare id rparen lcurly statement rcurly rcurly;     
+    tclass [classid]:id [classlcurly]:lcurly public main lparen string_type lsquare rsquare [argid]:id rparen [mainlcurly]:lcurly statement [mainrcurly]:rcurly [classrcurly]:rcurly;     
   
   classdecl = 
-    {simple_class} class id lcurly vardecl* methoddecl* rcurly |
-	{extended_class} class id extends id lcurly vardecl* methoddecl* rcurly;
+    {simple_class} tclass id lcurly vardecl* methoddecl* rcurly |
+	{extended_class} tclass [classid]:id extends [superid]:id lcurly vardecl* methoddecl* rcurly;
   
   vardecl = 
     type id;
@@ -87,36 +87,39 @@ Productions
     {int_array_type} int_type lsquare rsquare |
 	{boolean_type} boolean_type |
 	{int_type} int_type |
-	{id_type} id
+	{id_type} id;
 
   statement =
     {statements} lcurly statement* rcurly |
-	{if} lparen exp rparen statement else statement |
+	{if} lparen exp rparen [ifstm]:statement else [elsestm]:statement |
     {print} print lparen exp rparen semicolon |
-     {id_attribution} id equal exp semicolon |
-    {array_attribution} id lsquare exp rsquare equal exp semicolon;
+    {id_attribution} id equal exp semicolon |
+    {array_attribution} id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon;
 
   exp =
-    {operation} exp op exp |
-	{array} exp lsquare exp rsquare |
-	{lenght} exp dot lenght |
-	{method} exp dot id lparen explist rparen |
-	{integer_literal} integer |
-	{true} true |
-	{false} false |
-	{id} id |
-	{this} this |
-	{new_int_array} new int_type lsquare exp rsquare |
-	{new_id} new id lparen rparen |
-	{not_expr} not exp |
-	{paren_expr} lparen exp rparen;
+	{integer_literal} integer exp_aux |
+	{true} true exp_aux |
+	{false} false exp_aux |
+	{id} id exp_aux |
+	{this} this exp_aux |
+	{new_int_array} new int_type lsquare exp rsquare exp_aux |
+	{new_id} new id lparen rparen exp_aux |
+	{not_expr} not exp exp_aux |
+	{paren_expr} lparen exp rparen exp_aux;
+
+  exp_aux =
+    {operation} op exp exp_aux |
+	{array} lsquare exp rsquare exp_aux |
+	{lenght} dot lenght exp_aux |
+	{method} dot id lparen explist rparen exp_aux |
+	;
 	
   explist =
     elist?;
 
-  elist {explist} =
+  elist =
     exp exprest*;
     
-  exprest {exprest} =
+  exprest =
     comma exp; 
     
