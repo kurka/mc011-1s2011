@@ -110,26 +110,42 @@ Productions
   ()
   []
   **********************************************/
-  exp = and_exp;
+  exp =
+    less_exp and_sentence*;
 
-  and_exp =
-    less_exp {and and_exp}*;
+  and_sentence =
+    and exp;
 
   less_exp =
-    addsub_exp (less less_exp)*;
+    addsub_exp less_sentence*;
+
+  less_sentence = 
+    less less_exp;
 
   addsub_exp =
-    mul_exp (addsub addsub_exp)*;
+    mul_exp addsub_exp*;
+
+  addsub_sentence =
+    addsub addsub_exp;
 
   mul_exp =
-    dot_exp (mul mul_exp )*;
+    dot_exp mul_sentence*;
+
+  mul_sentence =
+    mul mul_exp;
 
   dot_exp =
-    {lenght} array_exp (dot lenght)? |
-	{method} array_exp (dot id lparen explist rparen)?;
+    array_exp dot_sentence?;
 
+  dot_sentence =
+    {lenght} dot lenght |
+	{method} dot id lparen explist rparen;
+   
   array_exp =
-    final_exp (lsquare exp rsquare)?;
+    final_exp array_sentence?;
+
+  array_sentence =
+    lsquare exp rsquare;
 
   final_exp =
 	{integer_literal} integer |
