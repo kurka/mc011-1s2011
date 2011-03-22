@@ -22,7 +22,7 @@ public class TestLexer{
 			System.out.print(" ");
 		else if(t instanceof TBooleanType)
 			System.out.print("BOOLEANTYPE ");
-		else if(t instanceof TClass)
+		else if(t instanceof TTclass)
 			System.out.print("CLASS ");
 		else if(t instanceof TComma)
 			System.out.print("COMMA ");
@@ -58,10 +58,16 @@ public class TestLexer{
 			System.out.print("NEW ");
 		else if(t instanceof TNot)
 			System.out.print("NOT ");
-		else if(t instanceof TNum)
-			System.out.print("NUM ");
-		else if(t instanceof TOp)
-			System.out.print("OP ");
+		else if(t instanceof TInteger)
+			System.out.print("INTEGER ");
+		else if(t instanceof TLess)
+			System.out.print("LESS ");
+		else if(t instanceof TAnd)
+			System.out.print("AND ");
+		else if(t instanceof TAddsub)
+			System.out.print("ADDSUB ");
+		else if(t instanceof TMul)
+			System.out.print("MUL ");
 		else if(t instanceof TPrint)
 			System.out.print("PRINT ");
 		else if(t instanceof TPublic)

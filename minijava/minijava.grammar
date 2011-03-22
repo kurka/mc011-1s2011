@@ -78,10 +78,8 @@ Productions
     public type id lparen formallist rparen lcurly vardecl* statement* return exp semicolon rcurly;
   
   formallist = 
-    flist?;
-  
-  flist = 
-    type id formalrest*;
+    {formallist} type id formalrest* |
+	{empty_formallist} ;
   
   formalrest = 
     comma type id;
@@ -100,39 +98,43 @@ Productions
     {array_attribution} id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon;
 
   /*********************************************
-  ordem de precedencia das expressoes (http://www.uni-bonn.de/~manfear/javaoperators.php):
+  ordem de precedencia das expressoes (http://www.cs.uwf.edu/~eelsheik/cop2253/resources/op_precedence.html):
   &&
   <
   + -
   *
   !
   .
-  ()
   []
+  ()
   **********************************************/
   exp =
     less_exp and_sentence*;
 
   and_sentence =
-    and exp;
+    and less_exp;
 
   less_exp =
     addsub_exp less_sentence*;
 
   less_sentence = 
-    less less_exp;
+    less addsub_exp;
 
   addsub_exp =
-    mul_exp addsub_exp*;
+    mul_exp addsub_sentence*;
 
   addsub_sentence =
-    addsub addsub_exp;
+    addsub mul_exp;
 
   mul_exp =
-    dot_exp mul_sentence*;
+    not_exp mul_sentence*;
 
   mul_sentence =
-    mul mul_exp;
+    mul not_exp;
+
+  not_exp = 
+    {not_exp} not not_exp |
+	{dot_exp} dot_exp;
 
   dot_exp =
     array_exp dot_sentence?;
@@ -155,14 +157,11 @@ Productions
 	{this} this |
 	{new_int_array} new int_type lsquare exp rsquare |
 	{new_id} new id lparen rparen |
-	{not_expr} not exp |
 	{paren_expr} lparen exp rparen;
 
   explist =
-    elist?;
-
-  elist =
-    exp exprest*;
+    {explist} exp exprest* |
+	{blank_explist} ;
     
   exprest =
     comma exp; 
