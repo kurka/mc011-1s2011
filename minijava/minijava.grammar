@@ -56,8 +56,8 @@ Tokens
   blank = (' ' | 13 | 9 | 10)+;
 
 Ignored Tokens
- blank,
- comment;
+  blank,
+  comment;
 
 
 Productions

@@ -1,2 +1,2 @@
 #!/bin/bash
-java minijava.TestLexer < example.in 
+java minijava.TestLexer < example.java 
