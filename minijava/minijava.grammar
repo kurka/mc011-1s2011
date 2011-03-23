@@ -64,13 +64,16 @@ Productions
   program = 
     mainclass classdecl*;
   
-  mainclass = 
-    tclass [classid]:id [classlcurly]:lcurly public main lparen string_type lsquare rsquare [argid]:id rparen [mainlcurly]:lcurly statement [mainrcurly]:rcurly [classrcurly]:rcurly;     
+  mainclass {-> mainclass} = 
+    tclass [classid]:id [classlcurly]:lcurly public main lparen string_type lsquare rsquare [argid]:id rparen [mainlcurly]:lcurly statement [mainrcurly]:rcurly [classrcurly]:rcurly
+      {-> New mainclass(classid, argid)};
   
-  classdecl = 
-    {simple_class} tclass id lcurly vardecl* methoddecl* rcurly |
-	{extended_class} tclass [classid]:id extends [superid]:id lcurly vardecl* methoddecl* rcurly;
-  
+  classdecl {-> classdecl} = 
+    {simple_class} tclass [classid]:id lcurly [vars]:vardecl* [methods]:methoddecl* rcurly 
+      {-> New classdecl(classid, Null, [vars.vardecl], [methods.methoddecl])}|
+    {extended_class} tclass [classid]:id extends [superid]:id lcurly [vars]:vardecl* [methods]:methoddecl* rcurly;
+      {-> New classdecl(classid, superid, [vars.vardecl], [methods.methoddecl])}
+
   vardecl = 
     type id;
   
@@ -79,7 +82,7 @@ Productions
   
   formallist = 
     {formallist} type id formalrest* |
-	{empty_formallist} ;
+    {empty_formallist} ;
   
   formalrest = 
     comma type id;
@@ -166,3 +169,10 @@ Productions
   exprest =
     comma exp; 
     
+Abstract Syntax Tree
+  mainclass =
+    [classid]:id [argid]:id;
+
+  classdecl =
+    [classname]:id [super]:id? [vars]:vardecl* [methods]:methoddecl*;
+
