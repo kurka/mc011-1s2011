@@ -70,15 +70,17 @@ Productions
   
   classdecl {-> classdecl} = 
     {simple_class} tclass [classid]:id lcurly [vars]:vardecl* [methods]:methoddecl* rcurly 
-      {-> New classdecl(classid, Null, [vars.vardecl], [methods.methoddecl])}|
+      {-> New classdecl(classid, Null, [vars.vardecl], [methods.methoddecl])} |
     {extended_class} tclass [classid]:id extends [superid]:id lcurly [vars]:vardecl* [methods]:methoddecl* rcurly;
       {-> New classdecl(classid, superid, [vars.vardecl], [methods.methoddecl])}
 
-  vardecl = 
-    type id;
+  vardecl {-> vardecl} = 
+    [vartype]:type [varid]:id
+      {-> New vardecl(vartype, varid)};
   
-  methoddecl = 
-    public type id lparen formallist rparen lcurly vardecl* statement* return exp semicolon rcurly;
+  methoddecl {-> methoddecl} = 
+    public [returntype]:type [methodid]:id lparen [formals]:formallist rparen lcurly [locals]:vardecl* [body]:statement* return [returnexp]:exp semicolon rcurly
+      {-> New methoddecl(returntype, methodid, [formals.formallist], [locals.vardecl], [body.statement], [returnexp.exp])};
   
   formallist = 
     {formallist} type id formalrest* |
@@ -89,19 +91,20 @@ Productions
 
   type =
     {int_array_type} int_type lsquare rsquare |
-	{boolean_type} boolean_type |
-	{int_type} int_type |
-	{id_type} id;
+    {boolean_type} boolean_type |
+    {int_type} int_type |
+    {id_type} id;
 
   statement =
     {statements} lcurly statement* rcurly |
-	{if} lparen exp rparen [ifstm]:statement else [elsestm]:statement |
+    {if} lparen exp rparen [ifstm]:statement else [elsestm]:statement |
     {print} print lparen exp rparen semicolon |
     {id_attribution} id equal exp semicolon |
     {array_attribution} id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon;
 
   /*********************************************
-  ordem de precedencia das expressoes (http://www.cs.uwf.edu/~eelsheik/cop2253/resources/op_precedence.html):
+  ordem de precedencia das expressoes 
+  (http://www.cs.uwf.edu/~eelsheik/cop2253/resources/op_precedence.html):
   &&
   <
   + -
@@ -137,14 +140,14 @@ Productions
 
   not_exp = 
     {not_exp} not not_exp |
-	{dot_exp} dot_exp;
+    {dot_exp} dot_exp;
 
   dot_exp =
     array_exp dot_sentence?;
 
   dot_sentence =
     {lenght} dot lenght |
-	{method} dot id lparen explist rparen;
+    {method} dot id lparen explist rparen;
    
   array_exp =
     final_exp array_sentence?;
@@ -153,18 +156,18 @@ Productions
     lsquare exp rsquare;
 
   final_exp =
-	{integer_literal} integer |
-	{true} true |
-	{false} false |
-	{id} id |
-	{this} this |
-	{new_int_array} new int_type lsquare exp rsquare |
-	{new_id} new id lparen rparen |
-	{paren_expr} lparen exp rparen;
+    {integer_literal} integer |
+    {true} true |
+    {false} false |
+    {id} id |
+    {this} this |
+    {new_int_array} new int_type lsquare exp rsquare |
+    {new_id} new id lparen rparen |
+    {paren_expr} lparen exp rparen;
 
   explist =
     {explist} exp exprest* |
-	{blank_explist} ;
+    {blank_explist} ;
     
   exprest =
     comma exp; 
@@ -176,3 +179,8 @@ Abstract Syntax Tree
   classdecl =
     [classname]:id [super]:id? [vars]:vardecl* [methods]:methoddecl*;
 
+  vardecl =
+    [vartype]:type [varid]:id;
+
+  methoddecl =
+    [returntype]:type [methodid]:id [formals]:formallist [locals]:vardecl* [body]:statement* [returnexp]:exp;
