@@ -82,18 +82,21 @@ Productions
     public [returntype]:type [methodid]:id lparen [formals]:formallist rparen lcurly [locals]:vardecl* [body]:statement* return [returnexp]:exp semicolon rcurly
       {-> New methoddecl(returntype, methodid, [formals.formallist], [locals.vardecl], [body.statement], [returnexp.exp])};
   
-  formallist = 
-    {formallist} type id formalrest* |
-    {empty_formallist} ;
+  formallist {-> formallist} =
+    {notempty_formallist} [formaltype]:type [formalid]:id [formaltail]:formaltail*
+      {-> New formallist(formaltype, formalid, [tail.formaltail])} |
+    {empty_formallist}
+      {-> New formallist(null)};
   
-  formalrest = 
-    comma type id;
+  formaltail {-> formaltail} =
+    comma [formaltype]:type [formalid]:id
+      {-> New formaltail(formaltype, formalid)};
 
-  type =
-    {int_array_type} int_type lsquare rsquare |
-    {boolean_type} boolean_type |
-    {int_type} int_type |
-    {id_type} id;
+  type {-> type} =
+    {int_array_type} [int_array]:int_type lsquare rsquare {-> New type(int_array)} |
+    {boolean_type} [boolean]:boolean_type {-> New type(boolean)} |
+    {int_type} [int]:int_type {-> New type(int)} |
+    {id_type} [class]:id {-> New type(class)};
 
   statement =
     {statements} lcurly statement* rcurly |
@@ -184,3 +187,15 @@ Abstract Syntax Tree
 
   methoddecl =
     [returntype]:type [methodid]:id [formals]:formallist [locals]:vardecl* [body]:statement* [returnexp]:exp;
+
+  type =
+    [int_array]:int_type |
+    [boolean]:boolean_type |
+    [int]:int_type |
+    [class]:id;
+
+  formallist =
+    ([formaltype]:type [formalid]:id [formaltail]:formaltail*)?;
+
+  formaltail =
+    [formaltype]:type [formalid]:id;
