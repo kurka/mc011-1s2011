@@ -76,47 +76,61 @@ Productions
 
   vardecl {-> vardecl} = 
     [vartype]:type [varid]:id
-      {-> New vardecl(vartype, varid)};
+      {-> New vardecl([vartype.type], varid)};
   
   methoddecl {-> methoddecl} = 
     public [returntype]:type [methodid]:id lparen [formals]:formallist rparen lcurly [locals]:vardecl* [body]:statement* return [returnexp]:exp semicolon rcurly
-      {-> New methoddecl(returntype, methodid, [formals.formallist], [locals.vardecl], [body.statement], [returnexp.exp])};
+      {-> New methoddecl([returntype.type], methodid, [formals.formallist], [locals.vardecl], [body.statement], [returnexp.exp])};
   
   formallist {-> formallist} =
     {notempty_formallist} [formaltype]:type [formalid]:id [formaltail]:formaltail*
-      {-> New formallist(formaltype, formalid, [tail.formaltail])} |
+      {-> New formallist([formaltype.type], formalid, [tail.formaltail])} |
     {empty_formallist}
       {-> New formallist(null)};
   
   formaltail {-> formaltail} =
     comma [formaltype]:type [formalid]:id
-      {-> New formaltail(formaltype, formalid)};
+      {-> New formaltail([formaltype.type], formalid)};
 
   type {-> type} =
     {int_array_type} [int_array]:int_type lsquare rsquare {-> New type(int_array)} |
     {boolean_type} [boolean]:boolean_type {-> New type(boolean)} |
     {int_type} [int]:int_type {-> New type(int)} |
-    {id_type} [class]:id {-> New type(class)};
+    {id_type} [id]:id {-> New type(id)};
 
-  statement =
-    {statements} lcurly statement* rcurly |
-    {if} lparen exp rparen [ifstm]:statement else [elsestm]:statement |
-    {print} print lparen exp rparen semicolon |
-    {id_attribution} id equal exp semicolon |
-    {array_attribution} id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon;
+  statement {-> statement} =
+    [stmlist]:stmlist {-> New statement(stmlist)} |
+    [ifstm]:ifstm {-> New statement(ifstm)} |
+    [printstm]:printstm {-> New statement(printstm)} |
+    [assignstm]:assignstm {-> New statement(assignstm)};
 
-  /*********************************************
-  ordem de precedencia das expressoes 
-  (http://www.cs.uwf.edu/~eelsheik/cop2253/resources/op_precedence.html):
-  &&
-  <
-  + -
-  *
-  !
-  .
-  []
-  ()
-  **********************************************/
+  /**
+   * Statements
+   */
+  stmlist {-> stmlist} =
+    lcurly [statements]:statement* rcurly 
+      {-> New stmlist([statements.statement])};
+
+  ifstm {-> ifstm} =
+    if lparen [condition]:exp rparen [ifstm]:statement else [elsestm]:statement 
+      {-> New ifstm([condition.exp], [ifstm.statement], [elsestm.statement])};
+
+  printstm {-> printstm} =
+    print lparen [exp]:exp rparen semicolon
+      {-> New printstm([exp.exp])}
+
+  assignstm {-> assignstm} =
+    {id_assignstm} [id]:id equal [rightexp]:exp semicolon 
+      {-> New assignstm(id, null, [rightexp.exp])} |
+    {array_assignstm} [id]:id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon
+      {-> New assignstm(id, [indexexp.exp], [rightexp.exp])};
+
+  /**
+   * Expressions
+   * See precedence list at
+   * @link http://www.cs.uwf.edu/~eelsheik/cop2253/resources/op_precedence.html
+   *  && , <, +, -, *, !, ., [], ()
+   */
   exp =
     less_exp and_sentence*;
 
@@ -192,10 +206,30 @@ Abstract Syntax Tree
     [int_array]:int_type |
     [boolean]:boolean_type |
     [int]:int_type |
-    [class]:id;
+    [id]:id;
 
   formallist =
     ([formaltype]:type [formalid]:id [formaltail]:formaltail*)?;
 
   formaltail =
     [formaltype]:type [formalid]:id;
+
+  statement = 
+    [stmlist]:stmlist |
+    [ifstm]:ifstm |
+    [printstm]:printstm |
+    [id_assignstm]:id_assignstm |
+    [array_assignstm]:array_assignstm;
+
+  stmlist =
+    [statements]:statement*;
+
+  ifstm =
+    [condition]:exp [ifstm]:statement [elsestm]:statement;
+
+  printstm =
+    [exp]:exp;
+
+  assignstm =
+    [id]:id [indexexp]:exp? [rightexp]:exp;
+
