@@ -104,9 +104,7 @@ Productions
     [printstm]:printstm {-> New statement(printstm)} |
     [assignstm]:assignstm {-> New statement(assignstm)};
 
-  /**
-   * Statements
-   */
+  /* Statements */
   stmlist {-> stmlist} =
     lcurly [statements]:statement* rcurly 
       {-> New stmlist([statements.statement])};
@@ -129,7 +127,7 @@ Productions
    * Expressions
    * See precedence list at
    * @link http://www.cs.uwf.edu/~eelsheik/cop2253/resources/op_precedence.html
-   *  && , <, +, -, *, !, ., [], ()
+   *  &&  <  +  -  *  !  .  []  ()
    */
   exp =
     less_exp and_sentence*;
@@ -156,20 +154,20 @@ Productions
     mul not_exp;
 
   not_exp = 
-    {not_exp} not not_exp |
+    {not_exp} not not_exp | /* David, aqui não deveria ser "{not_exp} not exp"? @see:261 */
     {dot_exp} dot_exp;
 
   dot_exp =
-    array_exp dot_sentence?;
+    bracket_exp dot_sentence?;
 
   dot_sentence =
     {lenght} dot lenght |
     {method} dot id lparen explist rparen;
    
-  array_exp =
-    final_exp array_sentence?;
+  bracket_exp =
+    final_exp bracket_sentence?;
 
-  array_sentence =
+  bracket_sentence =
     lsquare exp rsquare;
 
   final_exp =
@@ -214,6 +212,7 @@ Abstract Syntax Tree
   formaltail =
     [formaltype]:type [formalid]:id;
 
+  /* Statements */
   statement = 
     [stmlist]:stmlist |
     [ifstm]:ifstm |
@@ -232,4 +231,33 @@ Abstract Syntax Tree
 
   assignstm =
     [id]:id [indexexp]:exp? [rightexp]:exp;
+
+  /* Expressions */
+  exp =
+    [less_exp]:less_exp [and_sentence]:and_sentence*;
+
+  and_sentence =
+    [less_exp]:less_exp;
+
+  less_exp =
+    [addsub_exp]:addsub_exp [less_sentence]:less_sentence*;
+
+  less_sentence =
+    [addsub_exp]:addsub_exp;
+
+  addsub_exp =
+    [mul_exp]:mul_exp [addsub_sentence]:addsub_sentence*;
+
+  addsub_sentence =
+    [mul_exp]:mul_exp;
+
+  mul_exp =
+    [not_exp]:not_exp [mul_sentence]:mul_sentence*;
+
+  mul_sentence =
+    [not_exp]:not_exp;
+
+  not_exp = 
+    [not_exp]:exp | /* TODO: needs review!! */
+    [dot_exp]:dot_exp;
 
