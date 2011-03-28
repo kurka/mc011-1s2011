@@ -154,7 +154,7 @@ Productions
     mul not_exp;
 
   not_exp = 
-    {not_exp} not not_exp | /* David, aqui não deveria ser "{not_exp} not exp"? @see:261 */
+    {not_exp} not not_exp |
     {dot_exp} dot_exp;
 
   dot_exp =
@@ -251,6 +251,8 @@ Abstract Syntax Tree
   addsub_sentence =
     [mul_exp]:mul_exp;
 
+  /* TODO - needs review */
+  /* A regra de produção do parser está OK. Não sei se está certo a AST... Tem algum jeito melhor? */
   mul_exp =
     [not_exp]:not_exp [mul_sentence]:mul_sentence*;
 
@@ -258,6 +260,6 @@ Abstract Syntax Tree
     [not_exp]:not_exp;
 
   not_exp = 
-    [not_exp]:exp | /* TODO: needs review!! */
+    [not_exp]:not_exp |
     [dot_exp]:dot_exp;
 
