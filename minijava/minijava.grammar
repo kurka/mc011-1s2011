@@ -43,10 +43,11 @@ Tokens
   
 
   id = nondigit (digit|nondigit)*;
-  integer = digit*;
+  integer = digit+;
   less = '<';
   and = '&&';
-  addsub = ('+' | '-');
+  plus = '+';
+  minus = '-';
   mul = '*';
   dot = '.';
   not = '!';
@@ -153,63 +154,76 @@ producao {-> objeto_gerado} =
     {arrayassign} [id]:id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon
         {-> New statement.arrayassign(id, indexexp.exp, rightexp.exp)};
 
-
   /**
    * Expressions
    * See precedence list at
    * @link http://www.cs.uwf.edu/~eelsheik/cop2253/resources/op_precedence.html
    *  &&  <  +  -  *  !  .  []  ()
    */
-  exp =
-    less_exp and_sentence*;
+  exp {-> exp} =
+    {and} exp and less_exp 
+      {-> New exp.and(exp.exp, less_exp.exp)} |
+    {less_exp} less_exp 
+      {-> less_exp.exp};
 
-  and_sentence =
-    and less_exp;
+  less_exp {-> exp} =
+    {less} less_exp less addsub_exp
+      {-> New exp.lessthan(less_exp.exp, addsub_exp.exp)} |
+    {addsub_exp} addsub_exp
+      {-> addsub_exp.exp};
 
-  less_exp =
-    addsub_exp less_sentence*;
+  addsub_exp {-> exp} =
+    {plus} addsub_exp plus mul_exp
+      {-> New exp.plus(addsub_exp.exp, mul_exp.exp)} |
+    {minus} addsub_exp minus mul_exp
+      {-> New exp.minus(addsub_exp.exp, mul_exp.exp)} |
+    {mul_exp} mul_exp
+      {-> mul_exp.exp};
 
-  less_sentence = 
-    less addsub_exp;
+  mul_exp {-> exp} =
+    {times} mul_exp mul not_exp 
+      {-> New exp.times(mul_exp.exp, not_exp.exp)}|
+    {not_exp} not_exp
+      {-> not_exp.exp};
 
-  addsub_exp =
-    mul_exp addsub_sentence*;
+  not_exp {-> exp} = 
+    {not_exp} not not_exp
+      {-> New exp.not()|
+    {dot_exp} dot_exp
+      {-> New dot_exp.exp};
 
-  addsub_sentence =
-    addsub mul_exp;
-
-  mul_exp =
-    not_exp mul_sentence*;
-
-  mul_sentence =
-    mul not_exp;
-
-  not_exp = 
-    {not_exp} not not_exp |
-    {dot_exp} dot_exp;
-
-  dot_exp =
-    bracket_exp dot_sentence?;
-
-  dot_sentence =
-    {lenght} dot lenght |
-    {method} dot id lparen explist rparen;
-   
-  bracket_exp =
-    final_exp bracket_sentence?;
-
-  bracket_sentence =
-    lsquare exp rsquare;
+  //ta certo isso aqui? to em duvida..
+  dot_exp {-> exp} =
+    {lenght} dot_exp dot lenght 
+      {-> New exp.arraylenght(dot_exp.exp)|
+    {call} dot_exp dot id lparen explist rparen 
+      {-> New exp.call(dot_exp.exp, id, explist.explist)} |
+    {array_exp} bracket_exp
+      {-> array_exp.exp}; 
+  
+  array_exp {-> exp} =
+    {array} final_exp lsquare exp rsquare //exp ou addsub_exp?
+      {-> New exp.arraylookup}|
+    {final_exp} final_exp
+      {-> final_exp.exp};
 
   final_exp =
-    {integer_literal} integer |
-    {true} true |
+    {integer_literal} integer 
+      {New exp.integerliteral(integer)} |
+    {true} true 
+      {New exp.true()} |
     {false} false |
+      {New exp.false()} |
     {id} id |
+      {New exp.identifierexp(id)} |
     {this} this |
+      {New exp.this()} |
     {new_int_array} new int_type lsquare exp rsquare |
+      {New exp.newarray(exp.exp)} |
     {new_id} new id lparen rparen |
-    {paren_expr} lparen exp rparen;
+      {New exp.newobject(id)} |
+    {paren_expr} lparen exp rparen
+      {New exp.?};
 
   explist =
     {explist} exp exprest* |
