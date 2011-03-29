@@ -61,67 +61,98 @@ Ignored Tokens
 
 
 Productions
-  program = 
-    mainclass classdecl*;
+
+/*
+Como fazer AST:
+
+producao {-> objeto_gerado} = 
+ decl1 decl2 token {-> new objeto_gerado(decl1.objeto decl2.objeto, token)}
+
+ casos especificos:
+
+ 1)quando decl tiver um label, usar label.objeto, ao inves de decl.objeto
+ 2)se decl tiver repeticoes (decl*), usar [decl.objeto]
+ 3)se a producao tiver mais de um subtipo, criar objeto desse subtipo:
+  -> new objeto_gerado.objeto_subtipo(decl1.objeto decl2.objeto)
+*/
+
+  program {-> program} = 
+    mainclass classdecl* 
+	  {-> New program(mainclass.mainclass, [classdecllist.classdecl])};
   
   mainclass {-> mainclass} = 
-    tclass [classid]:id [classlcurly]:lcurly public main lparen string_type lsquare rsquare [argid]:id rparen [mainlcurly]:lcurly statement [mainrcurly]:rcurly [classrcurly]:rcurly
-      {-> New mainclass(classid, argid)};
+    tclass [classid]:id 
+	  [classlcurly]:lcurly 
+	    public main lparen string_type lsquare rsquare [argid]:id rparen
+	      [mainlcurly]:lcurly 
+	        statement 
+	      [mainrcurly]:rcurly 
+      [classrcurly]:rcurly
+      {-> New mainclass(classid, argid, statement.statement)};
   
   classdecl {-> classdecl} = 
-    {simple_class} tclass [classid]:id lcurly [vars]:vardecl* [methods]:methoddecl* rcurly 
-      {-> New classdecl(classid, Null, [vars.vardecl], [methods.methoddecl])} |
-    {extended_class} tclass [classid]:id extends [superid]:id lcurly [vars]:vardecl* [methods]:methoddecl* rcurly;
-      {-> New classdecl(classid, superid, [vars.vardecl], [methods.methoddecl])}
+    {simple_class} 
+	tclass [classid]:id 
+	  lcurly
+        [vars]:vardecl* 
+	    [methods]:methoddecl* 
+      rcurly 
+      {-> New classdecl.classdeclsimple(classid, [vars.vardecl], [methods.methoddecl])} |
+    {extended_class} 
+    tclass [classid]:id extends [superid]:id 
+      lcurly
+        [vars]:vardecl* [methods]:methoddecl* 
+      rcurly;
+      {-> New classdecl.classdeclextends(classid, superid, [vars.vardecl], [methods.methoddecl])}
+
 
   vardecl {-> vardecl} = 
-    [vartype]:type [varid]:id
-      {-> New vardecl([vartype.type], varid)};
+    [vartype]:type [varid]:id semicolon
+      {-> New vardecl(vartype.type, varid)};
   
   methoddecl {-> methoddecl} = 
-    public [returntype]:type [methodid]:id lparen [formals]:formallist rparen lcurly [locals]:vardecl* [body]:statement* return [returnexp]:exp semicolon rcurly
-      {-> New methoddecl([returntype.type], methodid, [formals.formallist], [locals.vardecl], [body.statement], [returnexp.exp])};
+    public [returntype]:type [methodid]:id lparen [formals]:formallist rparen 
+      lcurly 
+        [locals]:vardecl* 
+        [body]:statement* 
+        return [returnexp]:exp semicolon 
+      rcurly
+      {-> New methoddecl([returntype.type], methodid, [formals.formal], [locals.vardecl], [body.statement], [returnexp.exp])};
   
-  formallist {-> formallist} =
-    {notempty_formallist} [formaltype]:type [formalid]:id [formaltail]:formaltail*
-      {-> New formallist([formaltype.type], formalid, [tail.formaltail])} |
+  formallist {-> formal*} =
+    {notempty_formallist} formal formaltail*
+      {-> [formal.formal, formaltail.formal]} |
     {empty_formallist}
-      {-> New formallist(null)};
-  
-  formaltail {-> formaltail} =
-    comma [formaltype]:type [formalid]:id
-      {-> New formaltail([formaltype.type], formalid)};
+      {-> []};
+ 
+  formal {-> formal} =
+    type id 
+      {-> New formal(type.type, id)};
+
+  formaltail {-> formal} =
+    comma type id
+      {-> New formal(type.type, id)};
 
   type {-> type} =
-    {int_array_type} [int_array]:int_type lsquare rsquare {-> New type(int_array)} |
-    {boolean_type} [boolean]:boolean_type {-> New type(boolean)} |
-    {int_type} [int]:int_type {-> New type(int)} |
-    {id_type} [id]:id {-> New type(id)};
+    {int_array_type} [int_array]:int_type lsquare rsquare {-> New type.int_array()} |
+    {boolean_type} boolean_type {-> New type.boolean()} |
+    {int_type} int_type {-> New type.int()} |
+    {id_type} id {-> New type.id(id)};
 
   statement {-> statement} =
-    [stmlist]:stmlist {-> New statement(stmlist)} |
-    [ifstm]:ifstm {-> New statement(ifstm)} |
-    [printstm]:printstm {-> New statement(printstm)} |
-    [assignstm]:assignstm {-> New statement(assignstm)};
+    {block} lcurly [statements]:statement* rcurly 
+        {-> New statement.stmlist([statements.statement])} |
+    {if} if lparen [condition]:exp rparen [ifstm]:statement else [elsestm]:statement 
+        {-> New statement.ifstm(condition.exp, ifstm.statement, elsestm.statement)} |
+    {while} while lparen exp rparen statement
+        {-> New statement.while(exp.exp, statement.statement)} |
+    {print} print lparen exp rparen semicolon
+        {-> New statement.printstm(exp.exp)} |
+    {assign} id equal [rightexp]:exp semicolon 
+        {-> New statement.assign(id, rightexp.exp)} |
+    {arrayassign} [id]:id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon
+        {-> New statement.arrayassign(id, indexexp.exp, rightexp.exp)};
 
-  /* Statements */
-  stmlist {-> stmlist} =
-    lcurly [statements]:statement* rcurly 
-      {-> New stmlist([statements.statement])};
-
-  ifstm {-> ifstm} =
-    if lparen [condition]:exp rparen [ifstm]:statement else [elsestm]:statement 
-      {-> New ifstm([condition.exp], [ifstm.statement], [elsestm.statement])};
-
-  printstm {-> printstm} =
-    print lparen [exp]:exp rparen semicolon
-      {-> New printstm([exp.exp])}
-
-  assignstm {-> assignstm} =
-    {id_assignstm} [id]:id equal [rightexp]:exp semicolon 
-      {-> New assignstm(id, null, [rightexp.exp])} |
-    {array_assignstm} [id]:id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon
-      {-> New assignstm(id, [indexexp.exp], [rightexp.exp])};
 
   /**
    * Expressions
@@ -188,31 +219,33 @@ Productions
     comma exp; 
     
 Abstract Syntax Tree
+
+  program =
+    mainclass classdecl;
+  
+
   mainclass =
-    [classid]:id [argid]:id;
+    [classid]:id [argid]:id statement;
 
   classdecl =
-    [classname]:id [super]:id? [vars]:vardecl* [methods]:methoddecl*;
+    {classdeclsimple} [classname]:id [vars]:vardecl* [methods]:methoddecl*; 
+    {classdeclextends} [classname]:id [super]:id [vars]:vardecl* [methods]:methoddecl*;
 
   vardecl =
     [vartype]:type [varid]:id;
 
   methoddecl =
-    [returntype]:type [methodid]:id [formals]:formallist [locals]:vardecl* [body]:statement* [returnexp]:exp;
+    [returntype]:type [methodid]:id [formals]:formal* [locals]:vardecl* [body]:statement* [returnexp]:exp;
 
   type =
-    [int_array]:int_type |
-    [boolean]:boolean_type |
-    [int]:int_type |
-    [id]:id;
+    {int_array} |
+    {boolean} |
+    {int_type} |
+    {id_type} id;
 
-  formallist =
-    ([formaltype]:type [formalid]:id [formaltail]:formaltail*)?;
+  formal = 
+    type id;
 
-  formaltail =
-    [formaltype]:type [formalid]:id;
-
-  /* Statements */
   statement = 
     [stmlist]:stmlist |
     [ifstm]:ifstm |
@@ -220,17 +253,11 @@ Abstract Syntax Tree
     [id_assignstm]:id_assignstm |
     [array_assignstm]:array_assignstm;
 
-  stmlist =
-    [statements]:statement*;
-
-  ifstm =
-    [condition]:exp [ifstm]:statement [elsestm]:statement;
-
-  printstm =
-    [exp]:exp;
-
-  assignstm =
-    [id]:id [indexexp]:exp? [rightexp]:exp;
+  {stmlist} statement* |
+  {ifstm} [condition]:exp [ifstm]:statement [elsestm]:statement |
+  {printstm} exp |
+  {assign} id [rightexp]:exp |
+  {arrayassign} id [indexexp]:exp [rightexp]:exp;
 
   /* Expressions */
   exp =
@@ -252,7 +279,7 @@ Abstract Syntax Tree
     [mul_exp]:mul_exp;
 
   /* TODO - needs review */
-  /* A regra de produção do parser está OK. Não sei se está certo a AST... Tem algum jeito melhor? */
+  /* A regra de producao do parser esta OK. Nao sei se esta certo a AST... Tem algum jeito melhor? */
   mul_exp =
     [not_exp]:not_exp [mul_sentence]:mul_sentence*;
 
