@@ -413,15 +413,15 @@ public class PrettyPrint extends DepthFirstAdapter
         print("!");
     }
 
-    public void caseAArraylenghtExp(AArraylenghtExp node)
+    public void caseAArraylengthExp(AArraylengthExp node)
     {
-        inAArraylenghtExp(node);
+        inAArraylengthExp(node);
         if(node.getExp() != null)
         {
             node.getExp().apply(this);
         }
-		print(".lenght");
-        outAArraylenghtExp(node);
+		print(".length");
+        outAArraylengthExp(node);
     }
 
 

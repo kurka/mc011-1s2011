@@ -46,8 +46,8 @@ public class TestLexer{
 			System.out.print("INT_TYPE ");
 		else if(t instanceof TLcurly)
 			System.out.print("LCURLY ");
-		else if(t instanceof TLenght)
-			System.out.print("LENGHT ");
+		else if(t instanceof TLength)
+			System.out.print("LENGTH ");
 		else if(t instanceof TLparen)
 			System.out.print("LPAREN ");
 		else if(t instanceof TLsquare)
