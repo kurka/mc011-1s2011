@@ -157,13 +157,12 @@ Productions
   mul_exp  =
     {times} mul_exp mul not_exp 
       |
-    {not_exp} ;
+    {not_exp} not_exp;
 
   not_exp  = 
     {not_exp} not not_exp
        |
-    {dot_exp} dot_exp
-      ;
+    {dot_exp} dot_exp;
 
   //ta certo isso aqui? to em duvida..
   dot_exp  =
@@ -171,14 +170,12 @@ Productions
        |
     {call} dot_exp dot id lparen explist rparen 
        |
-    {array_exp} array_exp
-      ; 
+    {array_exp} array_exp; 
   
   array_exp  =
     {array} final_exp lsquare exp rsquare //exp ou addsub_exp?
       |
-    {final_exp} final_exp
-      ;
+    {final_exp} final_exp;
 
   final_exp =
     {integer_literal} integer 
@@ -195,15 +192,12 @@ Productions
        |
     {new_id} new id lparen rparen
        |
-    {paren_expr} lparen exp rparen
-      ;
+    {paren_expr} lparen exp rparen;
 
   explist =
     {explist} exp exprest* 
        |
-    {blank_explist} 
-      ;
+    {blank_explist};
     
   exprest  =
-    comma exp
-      ; 
+    comma exp; 
