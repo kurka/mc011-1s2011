@@ -198,6 +198,11 @@ public class PrettyPrint extends DepthFirstAdapter
         outAMethoddecl(node);
     }
 
+    public void outAFormal(AFormal node)
+    {
+		print(node.getId().getText() + " ");
+        defaultOut(node);
+    }
     public void inAIntArrayTypeType(AIntArrayTypeType node)
     {
         defaultIn(node);

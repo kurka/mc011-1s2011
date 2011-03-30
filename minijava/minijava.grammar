@@ -188,7 +188,7 @@ producao {-> objeto_gerado} =
 
   not_exp {-> exp} = 
     {not_exp} not not_exp
-      {-> New exp.not()} |
+      {-> New exp.not(not_exp.exp)} |
     {dot_exp} dot_exp
       {-> dot_exp.exp};
 
@@ -278,7 +278,7 @@ Abstract Syntax Tree
     {plus} [left]:exp [right]:exp |
     {minus} [left]:exp [right]:exp |
     {times} [left]:exp [right]:exp |
-    {not} |
+    {not} exp |
     {arraylength} exp |
     {call} [left]:exp [name]:id [args]:exp* |
     {arraylookup} [left]:exp [right]:exp |
