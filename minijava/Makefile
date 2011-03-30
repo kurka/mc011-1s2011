@@ -4,6 +4,7 @@ tests:
 	javac minijava/TestLexer.java
 	javac minijava/TestParser.java
 	javac minijava/PrettyPrint.java
+	javac minijava/UglyPrint.java
 	javac minijava/TestAst.java
 
 sablecc:
