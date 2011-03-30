@@ -63,96 +63,73 @@ Ignored Tokens
 
 Productions
 
-/*
-Como fazer AST:
-
-producao {-> objeto_gerado} = 
- decl1 decl2 token {-> new objeto_gerado(decl1.objeto decl2.objeto, token)}
-
- casos especificos:
-
- 1)quando decl tiver um label, usar label.objeto, ao inves de decl.objeto
- 2)se decl tiver repeticoes (decl*), usar [decl.objeto]
- 3)se a producao tiver mais de um subtipo, criar objeto desse subtipo:
-  -> new objeto_gerado.objeto_subtipo(decl1.objeto decl2.objeto)
-*/
-
-  program {-> program} = 
-    mainclass classdecl* 
-	  {-> New program(mainclass.mainclass, [classdecllist.classdecl])};
+  program  = 
+    mainclass classdecl*;
   
-  mainclass {-> mainclass} = 
+  mainclass  = 
     tclass [classid]:id 
 	  [classlcurly]:lcurly 
 	    public main lparen string_type lsquare rsquare [argid]:id rparen
 	      [mainlcurly]:lcurly 
 	        statement 
 	      [mainrcurly]:rcurly 
-      [classrcurly]:rcurly
-      {-> New mainclass(classid, argid, statement.statement)};
+      [classrcurly]:rcurly;
   
-  classdecl {-> classdecl} = 
+  classdecl  = 
     {simple_class} 
 	tclass [classid]:id 
 	  lcurly
         [vars]:vardecl* 
 	    [methods]:methoddecl* 
       rcurly 
-      {-> New classdecl.classdeclsimple(classid, [vars.vardecl], [methods.methoddecl])} |
+       |
     {extended_class} 
     tclass [classid]:id extends [superid]:id 
       lcurly
         [vars]:vardecl* [methods]:methoddecl* 
-      rcurly
-      {-> New classdecl.classdeclextends(classid, superid, [vars.vardecl], [methods.methoddecl])};
+      rcurly;
 
 
-  vardecl {-> vardecl} = 
-    [vartype]:type [varid]:id semicolon
-      {-> New vardecl(vartype.type, varid)};
+  vardecl  = 
+    [vartype]:type [varid]:id semicolon;
   
-  methoddecl {-> methoddecl} = 
+  methoddecl  = 
     public [returntype]:type [methodid]:id lparen [formals]:formallist rparen 
       lcurly 
         [locals]:vardecl* 
         [body]:statement* 
         return [returnexp]:exp semicolon 
-      rcurly
-      {-> New methoddecl([returntype.type], methodid, [formals.formal], [locals.vardecl], [body.statement], [returnexp.exp])};
+      rcurly;
   
-  formallist {-> formal*} =
+  formallist  =
     {notempty_formallist} formal formaltail*
-      {-> [formal.formal, formaltail.formal]} |
-    {empty_formallist}
-      {-> []};
+       |
+    {empty_formallist} ;
  
-  formal {-> formal} =
-    type id 
-      {-> New formal(type.type, id)};
+  formal  =
+    type id ;
 
-  formaltail {-> formal} =
-    comma type id
-      {-> New formal(type.type, id)};
+  formaltail  =
+    comma type id;
 
-  type {-> type} =
-    {int_array_type} [int_array]:int_type lsquare rsquare {-> New type.int_array()} |
-    {boolean_type} boolean_type {-> New type.boolean()} |
-    {int_type} int_type {-> New type.int()} |
-    {id_type} id {-> New type.id(id)};
+  type  =
+    {int_array_type} [int_array]:int_type lsquare rsquare  |
+    {boolean_type} boolean_type  |
+    {int_type} int_type  |
+    {id_type} id;
 
-  statement {-> statement} =
+  statement  =
     {block} lcurly [statements]:statement* rcurly 
-        {-> New statement.stmlist([statements.statement])} |
+         |
     {if} if lparen [condition]:exp rparen [ifstm]:statement else [elsestm]:statement 
-        {-> New statement.ifstm(condition.exp, ifstm.statement, elsestm.statement)} |
+         |
     {while} while lparen exp rparen statement
-        {-> New statement.while(exp.exp, statement.statement)} |
+         |
     {print} print lparen exp rparen semicolon
-        {-> New statement.printstm(exp.exp)} |
+         |
     {assign} id equal [rightexp]:exp semicolon 
-        {-> New statement.assign(id, rightexp.exp)} |
-    {arrayassign} [id]:id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon
-        {-> New statement.arrayassign(id, indexexp.exp, rightexp.exp)};
+         |
+    {arrayassign} [id]:id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon;
 
   /**
    * Expressions
@@ -160,132 +137,73 @@ producao {-> objeto_gerado} =
    * @link http://www.cs.uwf.edu/~eelsheik/cop2253/resources/op_precedence.html
    *  &&  <  +  -  *  !  .  []  ()
    */
-  exp {-> exp} =
+  exp  =
     {and} exp and less_exp 
-      {-> New exp.and(exp.exp, less_exp.exp)} |
-    {less_exp} less_exp 
-      {-> less_exp.exp};
+       |
+    {less_exp} less_exp;
 
-  less_exp {-> exp} =
+  less_exp  =
     {less} less_exp less addsub_exp
-      {-> New exp.lessthan(less_exp.exp, addsub_exp.exp)} |
-    {addsub_exp} addsub_exp
-      {-> addsub_exp.exp};
+       |
+    {addsub_exp} addsub_exp;
 
-  addsub_exp {-> exp} =
+  addsub_exp  =
     {plus} addsub_exp plus mul_exp
-      {-> New exp.plus(addsub_exp.exp, mul_exp.exp)} |
+       |
     {minus} addsub_exp minus mul_exp
-      {-> New exp.minus(addsub_exp.exp, mul_exp.exp)} |
-    {mul_exp} mul_exp
-      {-> mul_exp.exp};
+       |
+    {mul_exp} mul_exp;
 
-  mul_exp {-> exp} =
+  mul_exp  =
     {times} mul_exp mul not_exp 
-      {-> New exp.times(mul_exp.exp, not_exp.exp)}|
-    {not_exp} 
-      {-> not_exp.exp};
+      |
+    {not_exp} ;
 
-  not_exp {-> exp} = 
+  not_exp  = 
     {not_exp} not not_exp
-      {-> New exp.not()} |
+       |
     {dot_exp} dot_exp
-      {-> dot_exp.exp};
+      ;
 
   //ta certo isso aqui? to em duvida..
-  dot_exp {-> exp} =
+  dot_exp  =
     {lenght} dot_exp dot lenght 
-      {-> New exp.arraylenght(dot_exp.exp)} |
+       |
     {call} dot_exp dot id lparen explist rparen 
-      {-> New exp.call(dot_exp.exp, id, [explist.exp])} |
-    {array_exp} bracket_exp
-      {-> array_exp.exp}; 
+       |
+    {array_exp} array_exp
+      ; 
   
-  array_exp {-> exp} =
+  array_exp  =
     {array} final_exp lsquare exp rsquare //exp ou addsub_exp?
-      {-> New exp.arraylookup(final_exp.exp, exp.exp)}|
+      |
     {final_exp} final_exp
-      {-> final_exp.exp};
+      ;
 
   final_exp =
     {integer_literal} integer 
-      {-> New exp.integerliteral(integer)} |
+       |
     {true} true 
-      {-> New exp.true()} |
-    {false} false |
-      {-> New exp.false()} |
-    {id} id |
-      {-> New exp.identifierexp(id)} |
-    {this} this |
-      {-> New exp.this()} |
-    {new_int_array} new int_type lsquare exp rsquare |
-      {-> New exp.newarray(exp.exp)} |
-    {new_id} new id lparen rparen |
-      {-> New exp.newobject(id)} |
+       |
+    {false} false
+       |
+    {id} id
+       |
+    {this} this
+       |
+    {new_int_array} new int_type lsquare exp rsquare
+       |
+    {new_id} new id lparen rparen
+       |
     {paren_expr} lparen exp rparen
-      {-> exp.exp};
+      ;
 
-  explist {-> exp*}=
+  explist =
     {explist} exp exprest* 
-      {-> [exp.exp, exprest.exp]} |
+       |
     {blank_explist} 
-      {-> []};
+      ;
     
-  exprest {-> exp} =
+  exprest  =
     comma exp
-      {-> exp.exp}; 
-  
-Abstract Syntax Tree
-
-  program =
-    mainclass classdecl*;
-  
-
-  mainclass =
-    [classid]:id [argid]:id [stm]:statement;
-
-  classdecl =
-    {classdeclsimple} [classname]:id [vars]:vardecl* [methods]:methoddecl* | 
-    {classdeclextends} [classname]:id [super]:id [vars]:vardecl* [methods]:methoddecl*;
-
-  vardecl =
-    [vartype]:type [varid]:id;
-
-  methoddecl =
-    [returntype]:type [methodid]:id [formals]:formal* [locals]:vardecl* [body]:statement* [returnexp]:exp;
-
-  type =
-    {int_array} |
-    {boolean} |
-    {int_type} |
-    {id_type} id;
-
-  formal = 
-    type id;
-
-  statement = 
-    {stmlist} statement* |
-    {ifstm} [condition]:exp [ifstm]:statement [elsestm]:statement |
-    {printstm} exp |
-    {assign} id [rightexp]:exp |
-    {arrayassign} id [indexexp]:exp [rightexp]:exp;
-
-  /* Expressions */
-  exp =
-    {and} [left]:exp [right]:exp |
-    {lessthan} [left]:exp [right]:exp |
-    {plus} [left]:exp [right]:exp |
-    {minus} [left]:exp [right]:exp |
-    {times} [left]:exp [right]:exp |
-    {not} |
-    {arraylenght} exp |
-    {call} [left]:exp [name]:id [args]:exp* |
-    {arraylookup} [left]:exp [right]:exp |
-    {integerliteral} integer |
-    {true} |
-    {false} |
-    {identifierexp} id |
-    {this} |
-    {newarray} exp |
-    {newobject} id;
-
+      ; 
