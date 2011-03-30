@@ -64,8 +64,10 @@ public class TestLexer{
 			System.out.print("LESS ");
 		else if(t instanceof TAnd)
 			System.out.print("AND ");
-		else if(t instanceof TAddsub)
-			System.out.print("ADDSUB ");
+		else if(t instanceof TPlus)
+			System.out.print("PLUS ");
+		else if(t instanceof TMinus)
+			System.out.print("MINUS ");
 		else if(t instanceof TMul)
 			System.out.print("MUL ");
 		else if(t instanceof TPrint)
