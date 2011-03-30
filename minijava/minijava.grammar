@@ -79,7 +79,7 @@ producao {-> objeto_gerado} =
 
   program {-> program} = 
     mainclass classdecl* 
-	  {-> New program(mainclass.mainclass, [classdecllist.classdecl])};
+	  {-> New program(mainclass.mainclass, [classdecl.classdecl])};
   
   mainclass {-> mainclass} = 
     tclass [classid]:id 
@@ -118,7 +118,7 @@ producao {-> objeto_gerado} =
         [body]:statement* 
         return [returnexp]:exp semicolon 
       rcurly
-      {-> New methoddecl([returntype.type], methodid, [formals.formal], [locals.vardecl], [body.statement], [returnexp.exp])};
+      {-> New methoddecl( returntype.type, methodid, [formals.formal], [locals.vardecl], [body.statement], returnexp.exp)};
   
   formallist {-> formal*} =
     {notempty_formallist} formal formaltail*
@@ -135,24 +135,24 @@ producao {-> objeto_gerado} =
       {-> New formal(type.type, id)};
 
   type {-> type} =
-    {int_array_type} [int_array]:int_type lsquare rsquare {-> New type.int_array()} |
-    {boolean_type} boolean_type {-> New type.boolean()} |
-    {int_type} int_type {-> New type.int()} |
-    {id_type} id {-> New type.id(id)};
+    {int_array_type} [int_array]:int_type lsquare rsquare {-> New type.int_array_type()} |
+    {boolean_type} boolean_type {-> New type.boolean_type()} |
+    {int_type} int_type {-> New type.integer_type()} |
+    {id_type} id {-> New type.identifier_type(id)};
 
   statement {-> statement} =
     {block} lcurly [statements]:statement* rcurly 
-        {-> New statement.stmlist([statements.statement])} |
+        {-> New statement.block([statements.statement])} |
     {if} if lparen [condition]:exp rparen [ifstm]:statement else [elsestm]:statement 
-        {-> New statement.ifstm(condition.exp, ifstm.statement, elsestm.statement)} |
+        {-> New statement.if(condition.exp, ifstm.statement, elsestm.statement)} |
     {while} while lparen exp rparen statement
         {-> New statement.while(exp.exp, statement.statement)} |
     {print} print lparen exp rparen semicolon
-        {-> New statement.printstm(exp.exp)} |
+        {-> New statement.print(exp.exp)} |
     {assign} id equal [rightexp]:exp semicolon 
         {-> New statement.assign(id, rightexp.exp)} |
     {arrayassign} [id]:id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon
-        {-> New statement.arrayassign(id, indexexp.exp, rightexp.exp)};
+        {-> New statement.array_assign(id, indexexp.exp, rightexp.exp)};
 
   /**
    * Expressions
@@ -183,7 +183,7 @@ producao {-> objeto_gerado} =
   mul_exp {-> exp} =
     {times} mul_exp mul not_exp 
       {-> New exp.times(mul_exp.exp, not_exp.exp)}|
-    {not_exp} 
+    {not_exp} not_exp 
       {-> not_exp.exp};
 
   not_exp {-> exp} = 
@@ -198,7 +198,7 @@ producao {-> objeto_gerado} =
       {-> New exp.arraylenght(dot_exp.exp)} |
     {call} dot_exp dot id lparen explist rparen 
       {-> New exp.call(dot_exp.exp, id, [explist.exp])} |
-    {array_exp} bracket_exp
+    {array_exp} array_exp
       {-> array_exp.exp}; 
   
   array_exp {-> exp} =
@@ -207,20 +207,20 @@ producao {-> objeto_gerado} =
     {final_exp} final_exp
       {-> final_exp.exp};
 
-  final_exp =
+  final_exp {-> exp} =
     {integer_literal} integer 
       {-> New exp.integerliteral(integer)} |
     {true} true 
       {-> New exp.true()} |
-    {false} false |
+    {false} false 
       {-> New exp.false()} |
-    {id} id |
+    {id} id 
       {-> New exp.identifierexp(id)} |
-    {this} this |
+    {this} this 
       {-> New exp.this()} |
-    {new_int_array} new int_type lsquare exp rsquare |
+    {new_int_array} new int_type lsquare exp rsquare 
       {-> New exp.newarray(exp.exp)} |
-    {new_id} new id lparen rparen |
+    {new_id} new id lparen rparen 
       {-> New exp.newobject(id)} |
     {paren_expr} lparen exp rparen
       {-> exp.exp};
@@ -255,20 +255,21 @@ Abstract Syntax Tree
     [returntype]:type [methodid]:id [formals]:formal* [locals]:vardecl* [body]:statement* [returnexp]:exp;
 
   type =
-    {int_array} |
-    {boolean} |
-    {int_type} |
-    {id_type} id;
+    {int_array_type} |
+    {boolean_type} |
+    {integer_type} |
+    {identifier_type} id;
 
   formal = 
     type id;
 
   statement = 
-    {stmlist} statement* |
-    {ifstm} [condition]:exp [ifstm]:statement [elsestm]:statement |
-    {printstm} exp |
+    {block} statement* |
+    {while} exp statement |
+    {if} [condition]:exp [ifstm]:statement [elsestm]:statement |
+    {print} exp |
     {assign} id [rightexp]:exp |
-    {arrayassign} id [indexexp]:exp [rightexp]:exp;
+    {array_assign} id [indexexp]:exp [rightexp]:exp;
 
   /* Expressions */
   exp =
