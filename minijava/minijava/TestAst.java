@@ -2,7 +2,6 @@ package minijava;
 import minijava.parser.*;
 import minijava.lexer.*;
 import minijava.node.*;
-//import prettyprint; 
 import java.io.*;
 
 public class TestAst { 
@@ -28,7 +27,7 @@ public class TestAst {
       System.out.println("\n");
     } 
     catch(Exception e){ 
-      System.out.println(e.getMessage()); 
+      System.err.println(e.getMessage());
     } 
   } 
 } 
