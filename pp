@@ -1,0 +1,23 @@
+#!/bin/bash
+
+USAGE="usage: pp <pasta>"
+
+# check if arg1 is present and is directory
+if [ $# -ne 1 ]
+then
+  echo $USAGE
+  exit
+fi
+
+if [ ! -d $1 ]
+then
+  echo $USAGE
+  exit
+fi
+
+
+for i in $(seq -w 20)
+do
+  echo "Parsing" $1/in/$i.java "..."
+  java minijava.TestParser < $1/in/$i.java > $1/out/$i.out
+done
