@@ -406,6 +406,31 @@ public class DepthFirstAdapter extends AnalysisAdapter
         {
             node.getCondition().apply(this);
         }
+        if(node.getStm() != null)
+        {
+            node.getStm().apply(this);
+        }
+        outAIfStatement(node);
+    }
+
+    public void inAIfElseStatement(AIfElseStatement node)
+    {
+        defaultIn(node);
+    }
+
+    public void outAIfElseStatement(AIfElseStatement node)
+    {
+        defaultOut(node);
+    }
+
+    @Override
+    public void caseAIfElseStatement(AIfElseStatement node)
+    {
+        inAIfElseStatement(node);
+        if(node.getCondition() != null)
+        {
+            node.getCondition().apply(this);
+        }
         if(node.getIfstm() != null)
         {
             node.getIfstm().apply(this);
@@ -414,7 +439,7 @@ public class DepthFirstAdapter extends AnalysisAdapter
         {
             node.getElsestm().apply(this);
         }
-        outAIfStatement(node);
+        outAIfElseStatement(node);
     }
 
     public void inAPrintStatement(APrintStatement node)

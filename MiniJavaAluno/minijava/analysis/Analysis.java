@@ -26,6 +26,7 @@ public interface Analysis extends Switch
     void caseABlockStatement(ABlockStatement node);
     void caseAWhileStatement(AWhileStatement node);
     void caseAIfStatement(AIfStatement node);
+    void caseAIfElseStatement(AIfElseStatement node);
     void caseAPrintStatement(APrintStatement node);
     void caseAAssignStatement(AAssignStatement node);
     void caseAArrayAssignStatement(AArrayAssignStatement node);

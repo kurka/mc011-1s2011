@@ -411,6 +411,31 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
     public void caseAIfStatement(AIfStatement node)
     {
         inAIfStatement(node);
+        if(node.getStm() != null)
+        {
+            node.getStm().apply(this);
+        }
+        if(node.getCondition() != null)
+        {
+            node.getCondition().apply(this);
+        }
+        outAIfStatement(node);
+    }
+
+    public void inAIfElseStatement(AIfElseStatement node)
+    {
+        defaultIn(node);
+    }
+
+    public void outAIfElseStatement(AIfElseStatement node)
+    {
+        defaultOut(node);
+    }
+
+    @Override
+    public void caseAIfElseStatement(AIfElseStatement node)
+    {
+        inAIfElseStatement(node);
         if(node.getElsestm() != null)
         {
             node.getElsestm().apply(this);
@@ -423,7 +448,7 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
         {
             node.getCondition().apply(this);
         }
-        outAIfStatement(node);
+        outAIfElseStatement(node);
     }
 
     public void inAPrintStatement(APrintStatement node)

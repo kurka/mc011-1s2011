@@ -139,6 +139,11 @@ public class AnalysisAdapter implements Analysis
         defaultCase(node);
     }
 
+    public void caseAIfElseStatement(AIfElseStatement node)
+    {
+        defaultCase(node);
+    }
+
     public void caseAPrintStatement(APrintStatement node)
     {
         defaultCase(node);

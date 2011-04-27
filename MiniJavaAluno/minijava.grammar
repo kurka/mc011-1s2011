@@ -141,18 +141,32 @@ producao {-> objeto_gerado} =
     {id_type} id {-> New type.identifier_type(id)};
 
   statement {-> statement} =
-    {block} lcurly [statements]:statement* rcurly 
-        {-> New statement.block([statements.statement])} |
-    {if} if lparen [condition]:exp rparen [ifstm]:statement else [elsestm]:statement 
-        {-> New statement.if(condition.exp, ifstm.statement, elsestm.statement)} |
+    {stm_without_trailing_substm} stm_without_trailing_substm
+      {-> stm_without_trailing_substm.statement} |
+    {if} if lparen [condition]:exp rparen [stm]:statement
+      {-> New statement.if(condition.exp, stm.statement)} |
+    {if_else} if lparen [condition]:exp rparen [ifstm]:stm_no_short_if else [elsestm]:statement
+      {-> New statement.if_else(condition.exp, ifstm.statement, elsestm.statement)} |
     {while} while lparen exp rparen statement
-        {-> New statement.while(exp.exp, statement.statement)} |
+      {-> New statement.while(exp.exp, statement.statement)};
+
+  stm_without_trailing_substm {-> statement} =
+    {block} lcurly [statements]:statement* rcurly
+      {-> New statement.block([statements.statement])} |
     {print} print lparen exp rparen semicolon
-        {-> New statement.print(exp.exp)} |
-    {assign} id equal [rightexp]:exp semicolon 
-        {-> New statement.assign(id, rightexp.exp)} |
+      {-> New statement.print(exp.exp)} |
+    {assign} id equal [rightexp]:exp semicolon
+      {-> New statement.assign(id, rightexp.exp)} |
     {arrayassign} [id]:id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon
-        {-> New statement.array_assign(id, indexexp.exp, rightexp.exp)};
+      {-> New statement.array_assign(id, indexexp.exp, rightexp.exp)};
+
+  stm_no_short_if {-> statement} =
+    {stm_without_trailing_substm} stm_without_trailing_substm
+      {-> stm_without_trailing_substm.statement} |
+    {while_no_short_if} while lparen exp rparen stm_no_short_if
+      {-> New statement.while(exp.exp, stm_no_short_if.statement)} |
+    {if_else_no_short_if} if lparen [condition]:exp rparen [ifstm]:stm_no_short_if else [elsestm]:stm_no_short_if
+      {-> New statement.if_else(condition.exp, ifstm.statement, elsestm.statement)};
 
   /**
    * Expressions
@@ -266,7 +280,8 @@ Abstract Syntax Tree
   statement = 
     {block} statement* |
     {while} exp statement |
-    {if} [condition]:exp [ifstm]:statement [elsestm]:statement |
+    {if} [condition]:exp [stm]:statement |
+    {if_else} [condition]:exp [ifstm]:statement [elsestm]:statement |
     {print} exp |
     {assign} id [rightexp]:exp |
     {array_assign} id [indexexp]:exp [rightexp]:exp;

@@ -8,8 +8,7 @@ import minijava.analysis.*;
 public final class AIfStatement extends PStatement
 {
     private PExp _condition_;
-    private PStatement _ifstm_;
-    private PStatement _elsestm_;
+    private PStatement _stm_;
 
     public AIfStatement()
     {
@@ -18,15 +17,12 @@ public final class AIfStatement extends PStatement
 
     public AIfStatement(
         @SuppressWarnings("hiding") PExp _condition_,
-        @SuppressWarnings("hiding") PStatement _ifstm_,
-        @SuppressWarnings("hiding") PStatement _elsestm_)
+        @SuppressWarnings("hiding") PStatement _stm_)
     {
         // Constructor
         setCondition(_condition_);
 
-        setIfstm(_ifstm_);
-
-        setElsestm(_elsestm_);
+        setStm(_stm_);
 
     }
 
@@ -35,8 +31,7 @@ public final class AIfStatement extends PStatement
     {
         return new AIfStatement(
             cloneNode(this._condition_),
-            cloneNode(this._ifstm_),
-            cloneNode(this._elsestm_));
+            cloneNode(this._stm_));
     }
 
     public void apply(Switch sw)
@@ -69,16 +64,16 @@ public final class AIfStatement extends PStatement
         this._condition_ = node;
     }
 
-    public PStatement getIfstm()
+    public PStatement getStm()
     {
-        return this._ifstm_;
+        return this._stm_;
     }
 
-    public void setIfstm(PStatement node)
+    public void setStm(PStatement node)
     {
-        if(this._ifstm_ != null)
+        if(this._stm_ != null)
         {
-            this._ifstm_.parent(null);
+            this._stm_.parent(null);
         }
 
         if(node != null)
@@ -91,32 +86,7 @@ public final class AIfStatement extends PStatement
             node.parent(this);
         }
 
-        this._ifstm_ = node;
-    }
-
-    public PStatement getElsestm()
-    {
-        return this._elsestm_;
-    }
-
-    public void setElsestm(PStatement node)
-    {
-        if(this._elsestm_ != null)
-        {
-            this._elsestm_.parent(null);
-        }
-
-        if(node != null)
-        {
-            if(node.parent() != null)
-            {
-                node.parent().removeChild(node);
-            }
-
-            node.parent(this);
-        }
-
-        this._elsestm_ = node;
+        this._stm_ = node;
     }
 
     @Override
@@ -124,8 +94,7 @@ public final class AIfStatement extends PStatement
     {
         return ""
             + toString(this._condition_)
-            + toString(this._ifstm_)
-            + toString(this._elsestm_);
+            + toString(this._stm_);
     }
 
     @Override
@@ -138,15 +107,9 @@ public final class AIfStatement extends PStatement
             return;
         }
 
-        if(this._ifstm_ == child)
+        if(this._stm_ == child)
         {
-            this._ifstm_ = null;
-            return;
-        }
-
-        if(this._elsestm_ == child)
-        {
-            this._elsestm_ = null;
+            this._stm_ = null;
             return;
         }
 
@@ -163,15 +126,9 @@ public final class AIfStatement extends PStatement
             return;
         }
 
-        if(this._ifstm_ == oldChild)
+        if(this._stm_ == oldChild)
         {
-            setIfstm((PStatement) newChild);
-            return;
-        }
-
-        if(this._elsestm_ == oldChild)
-        {
-            setElsestm((PStatement) newChild);
+            setStm((PStatement) newChild);
             return;
         }
 
