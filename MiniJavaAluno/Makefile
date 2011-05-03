@@ -1,7 +1,7 @@
-all: sablecc test1
+all: sablecc mainjava
 
-test1:
-	javac minijava/TestParser.java
+mainjava:
+	javac main/Main.java
 tests:
 	javac minijava/TestLexer.java
 	javac minijava/TestParser.java

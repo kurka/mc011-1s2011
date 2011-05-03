@@ -15,40 +15,40 @@ Tokens
   extends = 'extends';
   public = 'public';
   return = 'return';
-  this = 'this';
-  new = 'new';
+  tok_this = 'this';
+  tok_new = 'new';
 
   string_type = 'String';
   int_type = 'int';
   boolean_type = 'boolean';
 
-  if = 'if';
+  tok_if = 'if';
   else = 'else';
-  while = 'while';
-  print = 'System.out.println';
-  length = 'length';
+  tok_while = 'while';
+  tok_print = 'System.out.println';
+  tok_length = 'length';
   semicolon = ';';
   comma = ',';
-  equal = '=';
+  eq = '=';
 
-  true = 'true';
-  false = 'false';
+  tok_true = 'true';
+  tok_false = 'false';
 
-  lsquare = '[';
-  rsquare = ']';
-  lcurly = '{';
-  rcurly = '}';
+  l_brack = '[';
+  r_brack = ']';
+  l_brace = '{';
+  r_brace = '}';
   lparen = '(';
   rparen = ')';
   
 
   id = nondigit (digit|nondigit)*;
-  integer = digit+;
-  less = '<';
+  integer_literal = digit+;
+  lt = '<';
   and = '&&';
   plus = '+';
   minus = '-';
-  mul = '*';
+  times = '*';
   dot = '.';
   not = '!';
 
@@ -83,28 +83,28 @@ producao {-> objeto_gerado} =
   
   main_class {-> main_class} = 
     tclass [name]:id 
-	  [classlcurly]:lcurly 
-	    public main lparen string_type lsquare rsquare [main_args]:id rparen
-	      [mainlcurly]:lcurly 
+	  [classlcurly]:l_brace 
+	    public main lparen string_type l_brack r_brack [main_args]:id rparen
+	      [mainlcurly]:l_brace 
 	        statement 
-	      [mainrcurly]:rcurly 
-      [classrcurly]:rcurly
+	      [mainrcurly]:r_brace 
+      [classrcurly]:r_brace
       {-> New main_class(name, main_args, statement.statement)};
   
   class_decl {-> class_decl} = 
     {simple_class} 
 	tclass [classid]:id 
-	  lcurly
+	  l_brace
         [vars]:var_decl* 
 	    [methods]:method_decl* 
-      rcurly 
-      {-> New class_decl.class_decl_simple(classid, [vars.var_decl], [methods.method_decl])} |
+      r_brace 
+      {-> New class_decl(classid, Null, [vars.var_decl], [methods.method_decl])} |
     {extended_class} 
     tclass [classid]:id extends [superid]:id 
-      lcurly
+      l_brace
         [vars]:var_decl* [methods]:method_decl* 
-      rcurly
-      {-> New class_decl.class_decl_extends(classid, superid, [vars.var_decl], [methods.method_decl])};
+      r_brace
+      {-> New class_decl(classid, superid, [vars.var_decl], [methods.method_decl])};
 
 
   var_decl {-> var_decl} = 
@@ -113,11 +113,11 @@ producao {-> objeto_gerado} =
   
   method_decl {-> method_decl} = 
     public [returntype]:type [methodid]:id lparen [formals]:formallist rparen 
-      lcurly 
+      l_brace 
         [locals]:var_decl* 
         [body]:statement* 
         return [returnexp]:exp semicolon 
-      rcurly
+      r_brace
       {-> New method_decl( returntype.type, methodid, [formals.formal], [locals.var_decl], [body.statement], returnexp.exp)};
   
   formallist {-> formal*} =
@@ -135,7 +135,7 @@ producao {-> objeto_gerado} =
       {-> New formal(type.type, id)};
 
   type {-> type} =
-    {int_array_type} [int_array]:int_type lsquare rsquare {-> New type.int_array_type()} |
+    {int_array_type} [int_array]:int_type l_brack r_brack {-> New type.int_array_type()} |
     {boolean_type} boolean_type {-> New type.boolean_type()} |
     {int_type} int_type {-> New type.integer_type()} |
     {id_type} id {-> New type.identifier_type(id)};
@@ -143,29 +143,29 @@ producao {-> objeto_gerado} =
   statement {-> statement} =
     {stm_without_trailing_substm} stm_without_trailing_substm
       {-> stm_without_trailing_substm.statement} |
-    {if} if lparen [condition]:exp rparen [stm]:statement
+    {if} tok_if lparen [condition]:exp rparen [stm]:statement
       {-> New statement.if(condition.exp, stm.statement)} |
-    {if_else} if lparen [condition]:exp rparen [ifstm]:stm_no_short_if else [elsestm]:statement
+    {if_else} tok_if lparen [condition]:exp rparen [ifstm]:stm_no_short_if else [elsestm]:statement
       {-> New statement.if_else(condition.exp, ifstm.statement, elsestm.statement)} |
-    {while} while lparen exp rparen statement
+    {while} tok_while lparen exp rparen statement
       {-> New statement.while(exp.exp, statement.statement)};
 
   stm_without_trailing_substm {-> statement} =
-    {block} lcurly [statements]:statement* rcurly
+    {block} l_brace [statements]:statement* r_brace
       {-> New statement.block([statements.statement])} |
-    {print} print lparen exp rparen semicolon
-      {-> New statement.print(exp.exp)} |
-    {assign} id equal [rightexp]:exp semicolon
+    {print} tok_print lparen [value]:exp rparen semicolon
+      {-> New statement.print(tok_print, value.exp)} |
+    {assign} id eq [rightexp]:exp semicolon
       {-> New statement.assign(id, rightexp.exp)} |
-    {arrayassign} [id]:id lsquare [indexexp]:exp rsquare equal [rightexp]:exp semicolon
+    {arrayassign} [id]:id l_brack [indexexp]:exp r_brack eq [rightexp]:exp semicolon
       {-> New statement.array_assign(id, indexexp.exp, rightexp.exp)};
 
   stm_no_short_if {-> statement} =
     {stm_without_trailing_substm} stm_without_trailing_substm
       {-> stm_without_trailing_substm.statement} |
-    {while_no_short_if} while lparen exp rparen stm_no_short_if
+    {while_no_short_if} tok_while lparen exp rparen stm_no_short_if
       {-> New statement.while(exp.exp, stm_no_short_if.statement)} |
-    {if_else_no_short_if} if lparen [condition]:exp rparen [ifstm]:stm_no_short_if else [elsestm]:stm_no_short_if
+    {if_else_no_short_if} tok_if lparen [condition]:exp rparen [ifstm]:stm_no_short_if else [elsestm]:stm_no_short_if
       {-> New statement.if_else(condition.exp, ifstm.statement, elsestm.statement)};
 
   /**
@@ -181,7 +181,7 @@ producao {-> objeto_gerado} =
       {-> less_exp.exp};
 
   less_exp {-> exp} =
-    {less} less_exp less addsub_exp
+    {less} less_exp lt addsub_exp
       {-> New exp.lessthan(less_exp.exp, addsub_exp.exp)} |
     {addsub_exp} addsub_exp
       {-> addsub_exp.exp};
@@ -195,7 +195,7 @@ producao {-> objeto_gerado} =
       {-> mul_exp.exp};
 
   mul_exp {-> exp} =
-    {times} mul_exp mul not_exp 
+    {times} mul_exp times not_exp 
       {-> New exp.times(mul_exp.exp, not_exp.exp)}|
     {not_exp} not_exp 
       {-> not_exp.exp};
@@ -206,35 +206,34 @@ producao {-> objeto_gerado} =
     {dot_exp} dot_exp
       {-> dot_exp.exp};
 
-  //ta certo isso aqui? to em duvida..
   dot_exp {-> exp} =
-    {length} dot_exp dot length 
+    {length} dot_exp dot tok_length 
       {-> New exp.arraylength(dot_exp.exp)} |
-    {call} dot_exp dot id lparen explist rparen 
-      {-> New exp.call(dot_exp.exp, id, [explist.exp])} |
+    {call} [object]:dot_exp dot id lparen explist rparen 
+      {-> New exp.call(object.exp, id, [explist.exp])} |
     {array_exp} array_exp
       {-> array_exp.exp}; 
   
   array_exp {-> exp} =
-    {array} final_exp lsquare exp rsquare 
+    {array} final_exp l_brack exp r_brack 
       {-> New exp.arraylookup(final_exp.exp, exp.exp)}|
     {final_exp} final_exp
       {-> final_exp.exp};
 
   final_exp {-> exp} =
-    {integer_literal} integer 
-      {-> New exp.integerliteral(integer)} |
-    {true} true 
+    {integer_literal} [value]:integer_literal 
+      {-> New exp.integer_literal(value)} |
+    {true} tok_true 
       {-> New exp.true()} |
-    {false} false 
+    {false} tok_false 
       {-> New exp.false()} |
     {id} id 
       {-> New exp.identifierexp(id)} |
-    {this} this 
+    {this} tok_this 
       {-> New exp.this()} |
-    {new_int_array} new int_type lsquare exp rsquare 
+    {new_int_array} tok_new int_type l_brack exp r_brack 
       {-> New exp.newarray(exp.exp)} |
-    {new_id} new id lparen rparen 
+    {new_id} tok_new id lparen rparen 
       {-> New exp.newobject(id)} |
     {paren_expr} lparen exp rparen
       {-> exp.exp};
@@ -252,15 +251,15 @@ producao {-> objeto_gerado} =
 Abstract Syntax Tree
 
   program =
-    main_class class_decl*;
-  
+    main_class [classes]:class_decl*;
 
   main_class =
     [name]:id [main_args]:id statement;
 
   class_decl =
-    {class_decl_simple} [classname]:id [vars]:var_decl* [methods]:method_decl* | 
-    {class_decl_extends} [classname]:id [super]:id [vars]:var_decl* [methods]:method_decl*;
+    //{class_decl_simple} [name]:id [attributes]:var_decl* [methods]:method_decl* | 
+    //{class_decl_extends} [name]:id [super]:id [attributes]:var_decl* [methods]:method_decl*;
+    [name]:id [super]:id? [attributes]:var_decl* [methods]:method_decl*;
 
   var_decl =
     [vartype]:type [varid]:id;
@@ -282,7 +281,7 @@ Abstract Syntax Tree
     {while} exp statement |
     {if} [condition]:exp [stm]:statement |
     {if_else} [condition]:exp [ifstm]:statement [elsestm]:statement |
-    {print} exp |
+    {print} [token]:tok_print [value]:exp |
     {assign} id [rightexp]:exp |
     {array_assign} id [indexexp]:exp [rightexp]:exp;
 
@@ -295,9 +294,9 @@ Abstract Syntax Tree
     {times} [left]:exp [right]:exp |
     {not} exp |
     {arraylength} exp |
-    {call} [left]:exp [name]:id [args]:exp* |
+    {call} [object]:exp [method]:id [actuals]:exp* |
     {arraylookup} [left]:exp [right]:exp |
-    {integerliteral} integer |
+    {integer_literal} [value]:integer_literal |
     {true} |
     {false} |
     {identifierexp} id |
