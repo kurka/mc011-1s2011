@@ -19,8 +19,8 @@ Tokens
   tok_new = 'new';
 
   string_type = 'String';
-  int_type = 'int';
-  boolean_type = 'boolean';
+  tok_int = 'int';
+  tok_boolean = 'boolean';
 
   tok_if = 'if';
   else = 'else';
@@ -112,7 +112,7 @@ producao {-> objeto_gerado} =
       {-> New var_decl(vartype.type, varid)};
   
   method_decl {-> method_decl} = 
-    public [returntype]:type [methodid]:id lparen [formals]:formallist rparen 
+    public [returntype]:type [methodid]:id lparen [formals]:formallist? rparen 
       l_brace 
         [locals]:var_decl* 
         [body]:statement* 
@@ -120,24 +120,22 @@ producao {-> objeto_gerado} =
       r_brace
       {-> New method_decl( returntype.type, methodid, [formals.formal], [locals.var_decl], [body.statement], returnexp.exp)};
   
-  formallist {-> formal*} =
-    {notempty_formallist} formal formaltail*
-      {-> [formal.formal, formaltail.formal]} |
-    {empty_formallist}
-      {-> []};
+  formallist {-> formal} =
+    formal formaltail*
+      {-> formal.formal};
  
   formal {-> formal} =
     type id 
       {-> New formal(type.type, id)};
 
   formaltail {-> formal} =
-    comma type id
-      {-> New formal(type.type, id)};
+    comma formal
+      {-> formal.formal};
 
   type {-> type} =
-    {int_array_type} [int_array]:int_type l_brack r_brack {-> New type.int_array_type()} |
-    {boolean_type} boolean_type {-> New type.boolean_type()} |
-    {int_type} int_type {-> New type.integer_type()} |
+    {int_array_type} [int_array]:tok_int l_brack r_brack {-> New type.int_array_type()} |
+    {boolean_type} tok_boolean {-> New type.boolean_type()} |
+    {int_type} tok_int {-> New type.integer_type(tok_int)} |
     {id_type} id {-> New type.identifier_type(id)};
 
   statement {-> statement} =
@@ -209,7 +207,7 @@ producao {-> objeto_gerado} =
   dot_exp {-> exp} =
     {length} dot_exp dot tok_length 
       {-> New exp.arraylength(dot_exp.exp)} |
-    {call} [object]:dot_exp dot id lparen explist rparen 
+    {call} [object]:dot_exp dot id lparen explist? rparen 
       {-> New exp.call(object.exp, id, [explist.exp])} |
     {array_exp} array_exp
       {-> array_exp.exp}; 
@@ -231,7 +229,7 @@ producao {-> objeto_gerado} =
       {-> New exp.identifierexp(id)} |
     {this} tok_this 
       {-> New exp.this()} |
-    {new_int_array} tok_new int_type l_brack exp r_brack 
+    {new_int_array} tok_new tok_int l_brack exp r_brack 
       {-> New exp.newarray(exp.exp)} |
     {new_id} tok_new id lparen rparen 
       {-> New exp.newobject(id)} |
@@ -239,11 +237,9 @@ producao {-> objeto_gerado} =
       {-> exp.exp};
 
   explist {-> exp*}=
-    {explist} exp exprest* 
-      {-> [exp.exp, exprest.exp]} |
-    {blank_explist} 
-      {-> []};
-    
+    exp exprest* 
+      {-> [exp.exp, exprest.exp]};
+
   exprest {-> exp} =
     comma exp
       {-> exp.exp}; 
@@ -262,19 +258,19 @@ Abstract Syntax Tree
     [name]:id [super]:id? [attributes]:var_decl* [methods]:method_decl*;
 
   var_decl =
-    [vartype]:type [varid]:id;
+    type [name]:id;
 
   method_decl =
-    [returntype]:type [methodid]:id [formals]:formal* [locals]:var_decl* [body]:statement* [returnexp]:exp;
+    [return_type]:type [name]:id [formals]:formal* [locals]:var_decl* [body]:statement* [return_exp]:exp;
 
   type =
     {int_array_type} |
     {boolean_type} |
-    {integer_type} |
-    {identifier_type} id;
+    {integer_type} [token]:tok_int |
+    {identifier_type} [name]:id;
 
   formal = 
-    type id;
+    type [name]:id;
 
   statement = 
     {block} statement* |
