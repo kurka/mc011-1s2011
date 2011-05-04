@@ -145,9 +145,9 @@ producao {-> objeto_gerado} =
     {stm_without_trailing_substm} stm_without_trailing_substm
       {-> stm_without_trailing_substm.statement} |
     {if} tok_if l_paren [condition]:exp r_paren [stm]:statement
-      {-> New statement.if(condition.exp, stm.statement, Null)} |
+      {-> New statement.if(condition.exp, tok_if, stm.statement, Null)} |
     {if_else} tok_if l_paren [condition]:exp r_paren [ifstm]:stm_no_short_if tok_else [elsestm]:statement
-      {-> New statement.if(condition.exp, ifstm.statement, elsestm.statement)} |
+      {-> New statement.if(condition.exp, tok_if, ifstm.statement, elsestm.statement)} |
     {while} tok_while l_paren exp r_paren statement
       {-> New statement.while(exp.exp, statement.statement)};
 
@@ -167,7 +167,7 @@ producao {-> objeto_gerado} =
     {while_no_short_if} tok_while l_paren exp r_paren stm_no_short_if
       {-> New statement.while(exp.exp, stm_no_short_if.statement)} |
     {if_else_no_short_if} tok_if l_paren [condition]:exp r_paren [ifstm]:stm_no_short_if tok_else [elsestm]:stm_no_short_if
-      {-> New statement.if(condition.exp, ifstm.statement, elsestm.statement)};
+      {-> New statement.if(condition.exp, tok_if, ifstm.statement, elsestm.statement)};
 
   /**
    * Expressions
@@ -183,21 +183,21 @@ producao {-> objeto_gerado} =
 
   less_exp {-> exp} =
     {less} less_exp lt addsub_exp
-      {-> New exp.less_than(less_exp.exp, addsub_exp.exp)} |
+      {-> New exp.less_than(less_exp.exp, lt, addsub_exp.exp)} |
     {addsub_exp} addsub_exp
       {-> addsub_exp.exp};
 
   addsub_exp {-> exp} =
     {plus} addsub_exp plus mul_exp
-      {-> New exp.plus(addsub_exp.exp, mul_exp.exp)} |
+      {-> New exp.plus(addsub_exp.exp, plus, mul_exp.exp)} |
     {minus} addsub_exp minus mul_exp
-      {-> New exp.minus(addsub_exp.exp, mul_exp.exp)} |
+      {-> New exp.minus(addsub_exp.exp, minus, mul_exp.exp)} |
     {mul_exp} mul_exp
       {-> mul_exp.exp};
 
   mul_exp {-> exp} =
     {times} mul_exp times not_exp 
-      {-> New exp.times(mul_exp.exp, not_exp.exp)}|
+      {-> New exp.times(mul_exp.exp, times, not_exp.exp)}|
     {not_exp} not_exp 
       {-> not_exp.exp};
 
@@ -231,7 +231,7 @@ producao {-> objeto_gerado} =
     {id} id 
       {-> New exp.identifier(id)} |
     {this} tok_this 
-      {-> New exp.this()} |
+      {-> New exp.this(tok_this)} |
     {new_int_array} tok_new tok_int l_brack exp r_brack 
       {-> New exp.new_array(exp.exp)} |
     {new_id} tok_new id l_paren r_paren 
@@ -278,18 +278,18 @@ Abstract Syntax Tree
   statement = 
     {block} statement* |
     {while} exp statement |
-    {if} [condition]:exp [then_clause]:statement [else_clause]:statement? |
+    {if} [condition]:exp [token]:tok_if [then_clause]:statement [else_clause]:statement? |
     {print} [token]:tok_print [value]:exp |
-    {assign} id [rightexp]:exp |
+    {assign} [target]:id [value]:exp |
     {array_assign} id [indexexp]:exp [rightexp]:exp;
 
   /* Expressions */
   exp =
     {and} [left]:exp [right]:exp |
-    {less_than} [left]:exp [right]:exp |
-    {plus} [left]:exp [right]:exp |
-    {minus} [left]:exp [right]:exp |
-    {times} [left]:exp [right]:exp |
+    {less_than} [lhs]:exp [token]:lt [rhs]:exp |
+    {plus} [lhs]:exp [token]:plus [rhs]:exp |
+    {minus} [lhs]:exp [token]:minus [rhs]:exp |
+    {times} [lhs]:exp [token]:times [rhs]:exp |
     {not} exp |
     {array_length} exp |
     {call} [object]:exp [method]:id [actuals]:exp* |
@@ -297,10 +297,10 @@ Abstract Syntax Tree
     {integer_literal} [value]:integer_literal |
     {true} |
     {false} |
-    {identifier} id |
-    {this} |
+    {identifier} [name]:id |
+    {this} [token]:tok_this |
     {new_array} exp |
-    {new_object} id;
+    {new_object} [name]:id;
 	//TODO: equal
 	//TODO: token assign
 
