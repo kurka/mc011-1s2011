@@ -1,4 +1,8 @@
 #!/bin/bash
 
-java main.Main < example.java
+for i in $(ls testes/small/*/* testes/large/*) 
+do 
+  echo $i
+  java main.Main < $i
+done
 
