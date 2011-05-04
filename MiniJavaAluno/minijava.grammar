@@ -10,24 +10,26 @@ Helpers
   not_star_slash =  [not_star - '/'];
 
 Tokens
-  tclass = 'class';
-  main = 'static void main';
-  extends = 'extends';
-  public = 'public';
-  return = 'return';
+  tok_class = 'class';
+  tok_main = 'main';
+  tok_extends = 'extends';
+  tok_public = 'public';
+  tok_static = 'static';
+  tok_void = 'void';
+  tok_return = 'return';
   tok_this = 'this';
   tok_new = 'new';
 
-  string_type = 'String';
+  tok_string = 'String';
   tok_int = 'int';
   tok_boolean = 'boolean';
 
   tok_if = 'if';
-  else = 'else';
+  tok_else = 'else';
   tok_while = 'while';
   tok_print = 'System.out.println';
   tok_length = 'length';
-  semicolon = ';';
+  semi = ';';
   comma = ',';
   eq = '=';
 
@@ -38,8 +40,8 @@ Tokens
   r_brack = ']';
   l_brace = '{';
   r_brace = '}';
-  lparen = '(';
-  rparen = ')';
+  l_paren = '(';
+  r_paren = ')';
   
 
   id = nondigit (digit|nondigit)*;
@@ -49,16 +51,17 @@ Tokens
   plus = '+';
   minus = '-';
   times = '*';
-  dot = '.';
+  period = '.';
   not = '!';
 
-  comment = '//' not_newline* 10 |
-            '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';
-  blank = (' ' | 13 | 9 | 10)+;
+  line_comment = '//' not_newline* 10;
+  block_comment = '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';
+  tok_null = (' ' | 13 | 9 | 10)+;
 
 Ignored Tokens
-  blank,
-  comment;
+  tok_null,
+  line_comment,
+  block_comment;
 
 
 Productions
@@ -82,9 +85,9 @@ producao {-> objeto_gerado} =
 	  {-> New program(main_class.main_class, [class_decl.class_decl])};
   
   main_class {-> main_class} = 
-    tclass [name]:id 
+    tok_class [name]:id 
 	  [classlcurly]:l_brace 
-	    public main lparen string_type l_brack r_brack [main_args]:id rparen
+	    tok_public tok_static tok_void tok_main l_paren tok_string l_brack r_brack [main_args]:id r_paren
 	      [mainlcurly]:l_brace 
 	        statement 
 	      [mainrcurly]:r_brace 
@@ -93,14 +96,14 @@ producao {-> objeto_gerado} =
   
   class_decl {-> class_decl} = 
     {simple_class} 
-	tclass [classid]:id 
+	tok_class [classid]:id 
 	  l_brace
         [vars]:var_decl* 
 	    [methods]:method_decl* 
       r_brace 
       {-> New class_decl(classid, Null, [vars.var_decl], [methods.method_decl])} |
     {extended_class} 
-    tclass [classid]:id extends [superid]:id 
+    tok_class [classid]:id tok_extends [superid]:id 
       l_brace
         [vars]:var_decl* [methods]:method_decl* 
       r_brace
@@ -108,15 +111,15 @@ producao {-> objeto_gerado} =
 
 
   var_decl {-> var_decl} = 
-    [vartype]:type [varid]:id semicolon
+    [vartype]:type [varid]:id semi
       {-> New var_decl(vartype.type, varid)};
   
   method_decl {-> method_decl} = 
-    public [returntype]:type [methodid]:id lparen [formals]:formallist? rparen 
+    tok_public [returntype]:type [methodid]:id l_paren [formals]:formallist? r_paren 
       l_brace 
         [locals]:var_decl* 
         [body]:statement* 
-        return [returnexp]:exp semicolon 
+        tok_return [returnexp]:exp semi 
       r_brace
       {-> New method_decl( returntype.type, methodid, [formals.formal], [locals.var_decl], [body.statement], returnexp.exp)};
   
@@ -133,38 +136,38 @@ producao {-> objeto_gerado} =
       {-> formal.formal};
 
   type {-> type} =
-    {int_array_type} [int_array]:tok_int l_brack r_brack {-> New type.int_array_type()} |
-    {boolean_type} tok_boolean {-> New type.boolean_type()} |
-    {int_type} tok_int {-> New type.integer_type(tok_int)} |
-    {id_type} id {-> New type.identifier_type(id)};
+    {int_array_type} [int_array]:tok_int l_brack r_brack {-> New type.array()} |
+    {boolean_type} tok_boolean {-> New type.boolean()} |
+    {int_type} tok_int {-> New type.int(tok_int)} |
+    {id_type} id {-> New type.object(id)};
 
   statement {-> statement} =
     {stm_without_trailing_substm} stm_without_trailing_substm
       {-> stm_without_trailing_substm.statement} |
-    {if} tok_if lparen [condition]:exp rparen [stm]:statement
-      {-> New statement.if(condition.exp, stm.statement)} |
-    {if_else} tok_if lparen [condition]:exp rparen [ifstm]:stm_no_short_if else [elsestm]:statement
-      {-> New statement.if_else(condition.exp, ifstm.statement, elsestm.statement)} |
-    {while} tok_while lparen exp rparen statement
+    {if} tok_if l_paren [condition]:exp r_paren [stm]:statement
+      {-> New statement.if(condition.exp, stm.statement, Null)} |
+    {if_else} tok_if l_paren [condition]:exp r_paren [ifstm]:stm_no_short_if tok_else [elsestm]:statement
+      {-> New statement.if(condition.exp, ifstm.statement, elsestm.statement)} |
+    {while} tok_while l_paren exp r_paren statement
       {-> New statement.while(exp.exp, statement.statement)};
 
   stm_without_trailing_substm {-> statement} =
     {block} l_brace [statements]:statement* r_brace
       {-> New statement.block([statements.statement])} |
-    {print} tok_print lparen [value]:exp rparen semicolon
+    {print} tok_print l_paren [value]:exp r_paren semi
       {-> New statement.print(tok_print, value.exp)} |
-    {assign} id eq [rightexp]:exp semicolon
+    {assign} id eq [rightexp]:exp semi
       {-> New statement.assign(id, rightexp.exp)} |
-    {arrayassign} [id]:id l_brack [indexexp]:exp r_brack eq [rightexp]:exp semicolon
+    {arrayassign} [id]:id l_brack [indexexp]:exp r_brack eq [rightexp]:exp semi
       {-> New statement.array_assign(id, indexexp.exp, rightexp.exp)};
 
   stm_no_short_if {-> statement} =
     {stm_without_trailing_substm} stm_without_trailing_substm
       {-> stm_without_trailing_substm.statement} |
-    {while_no_short_if} tok_while lparen exp rparen stm_no_short_if
+    {while_no_short_if} tok_while l_paren exp r_paren stm_no_short_if
       {-> New statement.while(exp.exp, stm_no_short_if.statement)} |
-    {if_else_no_short_if} tok_if lparen [condition]:exp rparen [ifstm]:stm_no_short_if else [elsestm]:stm_no_short_if
-      {-> New statement.if_else(condition.exp, ifstm.statement, elsestm.statement)};
+    {if_else_no_short_if} tok_if l_paren [condition]:exp r_paren [ifstm]:stm_no_short_if tok_else [elsestm]:stm_no_short_if
+      {-> New statement.if(condition.exp, ifstm.statement, elsestm.statement)};
 
   /**
    * Expressions
@@ -180,7 +183,7 @@ producao {-> objeto_gerado} =
 
   less_exp {-> exp} =
     {less} less_exp lt addsub_exp
-      {-> New exp.lessthan(less_exp.exp, addsub_exp.exp)} |
+      {-> New exp.less_than(less_exp.exp, addsub_exp.exp)} |
     {addsub_exp} addsub_exp
       {-> addsub_exp.exp};
 
@@ -205,16 +208,16 @@ producao {-> objeto_gerado} =
       {-> dot_exp.exp};
 
   dot_exp {-> exp} =
-    {length} dot_exp dot tok_length 
-      {-> New exp.arraylength(dot_exp.exp)} |
-    {call} [object]:dot_exp dot id lparen explist? rparen 
+    {length} dot_exp period tok_length 
+      {-> New exp.array_length(dot_exp.exp)} |
+    {call} [object]:dot_exp period id l_paren explist? r_paren 
       {-> New exp.call(object.exp, id, [explist.exp])} |
     {array_exp} array_exp
       {-> array_exp.exp}; 
   
   array_exp {-> exp} =
     {array} final_exp l_brack exp r_brack 
-      {-> New exp.arraylookup(final_exp.exp, exp.exp)}|
+      {-> New exp.array_lookup(final_exp.exp, exp.exp)}|
     {final_exp} final_exp
       {-> final_exp.exp};
 
@@ -226,14 +229,14 @@ producao {-> objeto_gerado} =
     {false} tok_false 
       {-> New exp.false()} |
     {id} id 
-      {-> New exp.identifierexp(id)} |
+      {-> New exp.identifier(id)} |
     {this} tok_this 
       {-> New exp.this()} |
     {new_int_array} tok_new tok_int l_brack exp r_brack 
-      {-> New exp.newarray(exp.exp)} |
-    {new_id} tok_new id lparen rparen 
-      {-> New exp.newobject(id)} |
-    {paren_expr} lparen exp rparen
+      {-> New exp.new_array(exp.exp)} |
+    {new_id} tok_new id l_paren r_paren 
+      {-> New exp.new_object(id)} |
+    {paren_expr} l_paren exp r_paren
       {-> exp.exp};
 
   explist {-> exp*}=
@@ -264,10 +267,10 @@ Abstract Syntax Tree
     [return_type]:type [name]:id [formals]:formal* [locals]:var_decl* [body]:statement* [return_exp]:exp;
 
   type =
-    {int_array_type} |
-    {boolean_type} |
-    {integer_type} [token]:tok_int |
-    {identifier_type} [name]:id;
+    {array} |
+    {boolean} |
+    {int} [token]:tok_int |
+    {object} [name]:id;
 
   formal = 
     type [name]:id;
@@ -275,8 +278,7 @@ Abstract Syntax Tree
   statement = 
     {block} statement* |
     {while} exp statement |
-    {if} [condition]:exp [stm]:statement |
-    {if_else} [condition]:exp [ifstm]:statement [elsestm]:statement |
+    {if} [condition]:exp [then_clause]:statement [else_clause]:statement? |
     {print} [token]:tok_print [value]:exp |
     {assign} id [rightexp]:exp |
     {array_assign} id [indexexp]:exp [rightexp]:exp;
@@ -284,19 +286,21 @@ Abstract Syntax Tree
   /* Expressions */
   exp =
     {and} [left]:exp [right]:exp |
-    {lessthan} [left]:exp [right]:exp |
+    {less_than} [left]:exp [right]:exp |
     {plus} [left]:exp [right]:exp |
     {minus} [left]:exp [right]:exp |
     {times} [left]:exp [right]:exp |
     {not} exp |
-    {arraylength} exp |
+    {array_length} exp |
     {call} [object]:exp [method]:id [actuals]:exp* |
-    {arraylookup} [left]:exp [right]:exp |
+    {array_lookup} [left]:exp [right]:exp |
     {integer_literal} [value]:integer_literal |
     {true} |
     {false} |
-    {identifierexp} id |
+    {identifier} id |
     {this} |
-    {newarray} exp |
-    {newobject} id;
+    {new_array} exp |
+    {new_object} id;
+	//TODO: equal
+	//TODO: token assign
 
