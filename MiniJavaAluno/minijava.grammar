@@ -31,7 +31,8 @@ Tokens
   tok_length = 'length';
   semi = ';';
   comma = ',';
-  eq = '=';
+  assign = '=';
+  eq = '==';
 
   tok_true = 'true';
   tok_false = 'false';
@@ -136,8 +137,8 @@ producao {-> objeto_gerado} =
       {-> formal.formal};
 
   type {-> type} =
-    {int_array_type} [int_array]:tok_int l_brack r_brack {-> New type.array()} |
-    {boolean_type} tok_boolean {-> New type.boolean()} |
+    {int_array_type} tok_int l_brack r_brack {-> New type.array(tok_int)} |
+    {boolean_type} tok_boolean {-> New type.boolean(tok_boolean)} |
     {int_type} tok_int {-> New type.int(tok_int)} |
     {id_type} id {-> New type.object(id)};
 
@@ -149,23 +150,23 @@ producao {-> objeto_gerado} =
     {if_else} tok_if l_paren [condition]:exp r_paren [ifstm]:stm_no_short_if tok_else [elsestm]:statement
       {-> New statement.if(condition.exp, tok_if, ifstm.statement, elsestm.statement)} |
     {while} tok_while l_paren exp r_paren statement
-      {-> New statement.while(exp.exp, statement.statement)};
+      {-> New statement.while(tok_while, exp.exp, statement.statement)};
 
   stm_without_trailing_substm {-> statement} =
     {block} l_brace [statements]:statement* r_brace
-      {-> New statement.block([statements.statement])} |
+      {-> New statement.block(l_brace, [statements.statement])} |
     {print} tok_print l_paren [value]:exp r_paren semi
       {-> New statement.print(tok_print, value.exp)} |
-    {assign} id eq [rightexp]:exp semi
+    {assign} id assign [rightexp]:exp semi
       {-> New statement.assign(id, rightexp.exp)} |
-    {arrayassign} [id]:id l_brack [indexexp]:exp r_brack eq [rightexp]:exp semi
+    {arrayassign} [id]:id l_brack [indexexp]:exp r_brack assign [rightexp]:exp semi
       {-> New statement.array_assign(id, indexexp.exp, rightexp.exp)};
 
   stm_no_short_if {-> statement} =
     {stm_without_trailing_substm} stm_without_trailing_substm
       {-> stm_without_trailing_substm.statement} |
     {while_no_short_if} tok_while l_paren exp r_paren stm_no_short_if
-      {-> New statement.while(exp.exp, stm_no_short_if.statement)} |
+      {-> New statement.while(tok_while, exp.exp, stm_no_short_if.statement)} |
     {if_else_no_short_if} tok_if l_paren [condition]:exp r_paren [ifstm]:stm_no_short_if tok_else [elsestm]:stm_no_short_if
       {-> New statement.if(condition.exp, tok_if, ifstm.statement, elsestm.statement)};
 
@@ -177,7 +178,7 @@ producao {-> objeto_gerado} =
    */
   exp {-> exp} =
     {and} exp and less_exp 
-      {-> New exp.and(exp.exp, less_exp.exp)} |
+      {-> New exp.and(exp.exp, and, less_exp.exp)} |
     {less_exp} less_exp 
       {-> less_exp.exp};
 
@@ -203,13 +204,13 @@ producao {-> objeto_gerado} =
 
   not_exp {-> exp} = 
     {not_exp} not not_exp
-      {-> New exp.not(not_exp.exp)} |
+      {-> New exp.not(not, not_exp.exp)} |
     {dot_exp} dot_exp
       {-> dot_exp.exp};
 
   dot_exp {-> exp} =
     {length} dot_exp period tok_length 
-      {-> New exp.array_length(dot_exp.exp)} |
+      {-> New exp.array_length(dot_exp.exp, tok_length)} |
     {call} [object]:dot_exp period id l_paren explist? r_paren 
       {-> New exp.call(object.exp, id, [explist.exp])} |
     {array_exp} array_exp
@@ -217,7 +218,7 @@ producao {-> objeto_gerado} =
   
   array_exp {-> exp} =
     {array} final_exp l_brack exp r_brack 
-      {-> New exp.array_lookup(final_exp.exp, exp.exp)}|
+      {-> New exp.array_lookup(final_exp.exp, l_brack, exp.exp)}|
     {final_exp} final_exp
       {-> final_exp.exp};
 
@@ -225,15 +226,15 @@ producao {-> objeto_gerado} =
     {integer_literal} [value]:integer_literal 
       {-> New exp.integer_literal(value)} |
     {true} tok_true 
-      {-> New exp.true()} |
+      {-> New exp.true(tok_true)} |
     {false} tok_false 
-      {-> New exp.false()} |
+      {-> New exp.false(tok_false)} |
     {id} id 
       {-> New exp.identifier(id)} |
     {this} tok_this 
       {-> New exp.this(tok_this)} |
     {new_int_array} tok_new tok_int l_brack exp r_brack 
-      {-> New exp.new_array(exp.exp)} |
+      {-> New exp.new_array(tok_new, exp.exp)} |
     {new_id} tok_new id l_paren r_paren 
       {-> New exp.new_object(id)} |
     {paren_expr} l_paren exp r_paren
@@ -256,8 +257,6 @@ Abstract Syntax Tree
     [name]:id [main_args]:id statement;
 
   class_decl =
-    //{class_decl_simple} [name]:id [attributes]:var_decl* [methods]:method_decl* | 
-    //{class_decl_extends} [name]:id [super]:id [attributes]:var_decl* [methods]:method_decl*;
     [name]:id [super]:id? [attributes]:var_decl* [methods]:method_decl*;
 
   var_decl =
@@ -267,8 +266,8 @@ Abstract Syntax Tree
     [return_type]:type [name]:id [formals]:formal* [locals]:var_decl* [body]:statement* [return_exp]:exp;
 
   type =
-    {array} |
-    {boolean} |
+    {array} [token]:tok_int |
+    {boolean} [token]:tok_boolean |
     {int} [token]:tok_int |
     {object} [name]:id;
 
@@ -276,31 +275,30 @@ Abstract Syntax Tree
     type [name]:id;
 
   statement = 
-    {block} statement* |
-    {while} exp statement |
+    {block} [token]:l_brace [statements]:statement* |
+    {while} [token]:tok_while [condition]:exp [body]:statement |
     {if} [condition]:exp [token]:tok_if [then_clause]:statement [else_clause]:statement? |
     {print} [token]:tok_print [value]:exp |
     {assign} [target]:id [value]:exp |
-    {array_assign} id [indexexp]:exp [rightexp]:exp;
+    {array_assign} [target]:id [index]:exp [value]:exp;
 
   /* Expressions */
   exp =
-    {and} [left]:exp [right]:exp |
+    {and} [lhs]:exp [token]:and [rhs]:exp |
     {less_than} [lhs]:exp [token]:lt [rhs]:exp |
     {plus} [lhs]:exp [token]:plus [rhs]:exp |
     {minus} [lhs]:exp [token]:minus [rhs]:exp |
     {times} [lhs]:exp [token]:times [rhs]:exp |
-    {not} exp |
-    {array_length} exp |
+    {not} [token]:not [value]:exp |
+    {array_length} [array]:exp [token]:tok_length |
     {call} [object]:exp [method]:id [actuals]:exp* |
-    {array_lookup} [left]:exp [right]:exp |
+    {array_lookup} [array]:exp [token]:l_brack [index]:exp |
     {integer_literal} [value]:integer_literal |
-    {true} |
-    {false} |
+    {true} [token]:tok_true |
+    {false} [token]:tok_false |
     {identifier} [name]:id |
     {this} [token]:tok_this |
-    {new_array} exp |
+    {new_array} [token]:tok_new [size]:exp |
     {new_object} [name]:id;
-	//TODO: equal
-	//TODO: token assign
+	//TODO: equal ==
 
