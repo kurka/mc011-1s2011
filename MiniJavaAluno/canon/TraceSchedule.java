@@ -2,6 +2,7 @@ package canon;
 
 import util.List;
 
+@SuppressWarnings("unchecked")
 public class TraceSchedule
 {
     public List<tree.Stm> stms;

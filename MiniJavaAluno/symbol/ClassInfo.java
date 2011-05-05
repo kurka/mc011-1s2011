@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import temp.Label;
 
+@SuppressWarnings("unchecked")
 public class ClassInfo
 {
     public Label vtable;
