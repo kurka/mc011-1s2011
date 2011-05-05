@@ -1,6 +1,5 @@
-all: sablecc main/Main.class
-
-main/Main.class:
+all:
+	java -jar sablecc-3.2/lib/sablecc.jar minijava.grammar
 	javac main/Main.java
 
 tests:
@@ -10,10 +9,8 @@ tests:
 	javac minijava/UglyPrint.java
 	javac minijava/TestAst.java
 
-sablecc:
-	java -jar sablecc-3.2/lib/sablecc.jar minijava.grammar
-
 clean:
 	rm -rf minijava/analysis minijava/lexer minijava/node minijava/parser
+	rm --force */*/*.class
 	rm --force */*.class
 

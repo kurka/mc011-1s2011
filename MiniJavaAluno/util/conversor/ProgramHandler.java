@@ -27,7 +27,7 @@ class ProgramHandler extends AnalysisAdapter
 	
 	public void caseAProgram(AProgram node)
 	{
-		System.println(node.getText());
+		System.out.println(node.toString());
 		MainClass m = MainClassHandler.convert(node.getMainClass());
 		List<ClassDecl> c = ClassListHandler.convert(node.getClasses());
 		
