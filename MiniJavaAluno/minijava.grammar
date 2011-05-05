@@ -43,7 +43,7 @@ Tokens
   r_brace = '}';
   l_paren = '(';
   r_paren = ')';
-  
+
 
   id = nondigit (digit|nondigit)*;
   integer_literal = digit+;
@@ -70,7 +70,7 @@ Productions
 /*
 Como fazer AST:
 
-producao {-> objeto_gerado} = 
+producao {-> objeto_gerado} =
  decl1 decl2 token {-> new objeto_gerado(decl1.objeto decl2.objeto, token)}
 
  casos especificos:
@@ -81,55 +81,55 @@ producao {-> objeto_gerado} =
   -> new objeto_gerado.objeto_subtipo(decl1.objeto decl2.objeto)
 */
 
-  program {-> program} = 
-    main_class class_decl* 
+  program {-> program} =
+    main_class class_decl*
 	  {-> New program(main_class.main_class, [class_decl.class_decl])};
-  
-  main_class {-> main_class} = 
-    tok_class [name]:id 
-	  [classlcurly]:l_brace 
+
+  main_class {-> main_class} =
+    tok_class [name]:id
+	  [classlcurly]:l_brace
 	    tok_public tok_static tok_void tok_main l_paren tok_string l_brack r_brack [main_args]:id r_paren
-	      [mainlcurly]:l_brace 
-	        statement 
-	      [mainrcurly]:r_brace 
+	      [mainlcurly]:l_brace
+	        statement
+	      [mainrcurly]:r_brace
       [classrcurly]:r_brace
       {-> New main_class(name, main_args, statement.statement)};
-  
-  class_decl {-> class_decl} = 
-    {simple_class} 
-	tok_class [classid]:id 
+
+  class_decl {-> class_decl} =
+    {simple_class}
+	tok_class [classid]:id
 	  l_brace
-        [vars]:var_decl* 
-	    [methods]:method_decl* 
-      r_brace 
+        [vars]:var_decl*
+	    [methods]:method_decl*
+      r_brace
       {-> New class_decl(classid, Null, [vars.var_decl], [methods.method_decl])} |
-    {extended_class} 
-    tok_class [classid]:id tok_extends [superid]:id 
+    {extended_class}
+    tok_class [classid]:id tok_extends [superid]:id
       l_brace
-        [vars]:var_decl* [methods]:method_decl* 
+        [vars]:var_decl* [methods]:method_decl*
       r_brace
       {-> New class_decl(classid, superid, [vars.var_decl], [methods.method_decl])};
 
 
-  var_decl {-> var_decl} = 
+  var_decl {-> var_decl} =
     [vartype]:type [varid]:id semi
       {-> New var_decl(vartype.type, varid)};
-  
-  method_decl {-> method_decl} = 
-    tok_public [returntype]:type [methodid]:id l_paren [formals]:formallist? r_paren 
-      l_brace 
-        [locals]:var_decl* 
-        [body]:statement* 
-        tok_return [returnexp]:exp semi 
+
+  method_decl {-> method_decl} =
+    tok_public [returntype]:type [methodid]:id l_paren [formals]:formallist? r_paren
+      l_brace
+        [locals]:var_decl*
+        [body]:statement*
+        tok_return [returnexp]:exp semi
       r_brace
       {-> New method_decl( returntype.type, methodid, [formals.formal], [locals.var_decl], [body.statement], returnexp.exp)};
-  
+
   formallist {-> formal} =
     formal formaltail*
       {-> formal.formal};
- 
+
   formal {-> formal} =
-    type id 
+    type id
       {-> New formal(type.type, id)};
 
   formaltail {-> formal} =
@@ -174,12 +174,18 @@ producao {-> objeto_gerado} =
    * Expressions
    * See precedence list at
    * @link http://www.cs.uwf.edu/~eelsheik/cop2253/resources/op_precedence.html
-   *  &&  <  +  -  *  !  .  []  ()
+   *  &&  ==  <  +  -  *  !  .  []  ()
    */
   exp {-> exp} =
-    {and} exp and less_exp 
-      {-> New exp.and(exp.exp, and, less_exp.exp)} |
-    {less_exp} less_exp 
+    {and} exp and equal_exp
+      {-> New exp.and(exp.exp, and, equal_exp.exp)} |
+    {equal_exp} equal_exp
+      {-> equal_exp.exp};
+
+  equal_exp {-> exp} =
+    {equal} equal_exp eq less_exp
+      {-> New exp.equal(equal_exp.exp, eq, less_exp.exp)} |
+    {less_exp} less_exp
       {-> less_exp.exp};
 
   less_exp {-> exp} =
@@ -197,57 +203,57 @@ producao {-> objeto_gerado} =
       {-> mul_exp.exp};
 
   mul_exp {-> exp} =
-    {times} mul_exp times not_exp 
+    {times} mul_exp times not_exp
       {-> New exp.times(mul_exp.exp, times, not_exp.exp)}|
-    {not_exp} not_exp 
+    {not_exp} not_exp
       {-> not_exp.exp};
 
-  not_exp {-> exp} = 
+  not_exp {-> exp} =
     {not_exp} not not_exp
       {-> New exp.not(not, not_exp.exp)} |
     {dot_exp} dot_exp
       {-> dot_exp.exp};
 
   dot_exp {-> exp} =
-    {length} dot_exp period tok_length 
+    {length} dot_exp period tok_length
       {-> New exp.array_length(dot_exp.exp, tok_length)} |
-    {call} [object]:dot_exp period id l_paren explist? r_paren 
+    {call} [object]:dot_exp period id l_paren explist? r_paren
       {-> New exp.call(object.exp, id, [explist.exp])} |
     {array_exp} array_exp
-      {-> array_exp.exp}; 
-  
+      {-> array_exp.exp};
+
   array_exp {-> exp} =
-    {array} final_exp l_brack exp r_brack 
+    {array} final_exp l_brack exp r_brack
       {-> New exp.array_lookup(final_exp.exp, l_brack, exp.exp)}|
     {final_exp} final_exp
       {-> final_exp.exp};
 
   final_exp {-> exp} =
-    {integer_literal} [value]:integer_literal 
+    {integer_literal} [value]:integer_literal
       {-> New exp.integer_literal(value)} |
-    {true} tok_true 
+    {true} tok_true
       {-> New exp.true(tok_true)} |
-    {false} tok_false 
+    {false} tok_false
       {-> New exp.false(tok_false)} |
-    {id} id 
+    {id} id
       {-> New exp.identifier(id)} |
-    {this} tok_this 
+    {this} tok_this
       {-> New exp.this(tok_this)} |
-    {new_int_array} tok_new tok_int l_brack exp r_brack 
+    {new_int_array} tok_new tok_int l_brack exp r_brack
       {-> New exp.new_array(tok_new, exp.exp)} |
-    {new_id} tok_new id l_paren r_paren 
+    {new_id} tok_new id l_paren r_paren
       {-> New exp.new_object(id)} |
     {paren_expr} l_paren exp r_paren
       {-> exp.exp};
 
   explist {-> exp*}=
-    exp exprest* 
+    exp exprest*
       {-> [exp.exp, exprest.exp]};
 
   exprest {-> exp} =
     comma exp
-      {-> exp.exp}; 
-  
+      {-> exp.exp};
+
 Abstract Syntax Tree
 
   program =
@@ -271,10 +277,10 @@ Abstract Syntax Tree
     {int} [token]:tok_int |
     {object} [name]:id;
 
-  formal = 
+  formal =
     type [name]:id;
 
-  statement = 
+  statement =
     {block} [token]:l_brace [statements]:statement* |
     {while} [token]:tok_while [condition]:exp [body]:statement |
     {if} [condition]:exp [token]:tok_if [then_clause]:statement [else_clause]:statement? |
@@ -285,6 +291,7 @@ Abstract Syntax Tree
   /* Expressions */
   exp =
     {and} [lhs]:exp [token]:and [rhs]:exp |
+    {equal} [lhs]:exp [token]:eq [rhs]:exp |
     {less_than} [lhs]:exp [token]:lt [rhs]:exp |
     {plus} [lhs]:exp [token]:plus [rhs]:exp |
     {minus} [lhs]:exp [token]:minus [rhs]:exp |
@@ -300,5 +307,4 @@ Abstract Syntax Tree
     {this} [token]:tok_this |
     {new_array} [token]:tok_new [size]:exp |
     {new_object} [name]:id;
-	//TODO: equal ==
 
