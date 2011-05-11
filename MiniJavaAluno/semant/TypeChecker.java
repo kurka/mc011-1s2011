@@ -1,6 +1,8 @@
 package semant;
 
 import syntaxtree.Program;
+import semant.first_pass.FirstPass;
+//import semant.second_pass.SecondPass;
 import errors.ErrorEchoer;
 
 public class TypeChecker
@@ -12,6 +14,8 @@ public class TypeChecker
 
     public static Env TypeCheck(ErrorEchoer err, Program p)
     {		
-        return null;
+        Env e = FirstPass.firstPass(err, p);;
+		//SecondPass.secondPass(e, p);
+		return null;
     }
 }
