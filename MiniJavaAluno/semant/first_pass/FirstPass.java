@@ -1,6 +1,7 @@
 package semant.first_pass;
 
-import semant.first_pass.ProgramHandler;
+import semant.Env;
+//import semant.first_pass.ProgramHandler;
 import syntaxtree.Program;
 import errors.ErrorEchoer;
 
@@ -10,7 +11,7 @@ public final class FirstPass{
 	}
 
 	public static Env firstPass(ErrorEchoer err, Program p){
-		return ProgramHandler.firstPass(err, p);
+		//return ProgramHandler.firstPass(err, p);
+    return null;
 	}
 }
-	

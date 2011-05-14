@@ -1,26 +1,22 @@
 package semant.first_pass;
 
+import semant.Env;
+import errors.ErrorEchoer;
+
 import syntaxtree.VisitorAdapter;
 import syntaxtree.ClassDecl;
 import syntaxtree.MainClass;
 import syntaxtree.Program;
 
-class ProgramHandler extends VisitorAdapter{
-	private Env result;
-	
-	private ProgramHandler(){
-		super();
-		result = new Env(err);
-	}
+class ProgramHandler extends VisitorAdapter {
+  private ProgramHandler() {
+    super();
+  }
 
-	static Env firstPass(ErrorEchoer err, Program p){
-		ProgramHandler h = new ProgramHandler(err);
-		p.accept(h);
-		return h.result;
-		}
+  static Env firstPass(ErrorEchoer err, Program p) {
+    return null;
+  }
 
-	public void visit(Program node){
-		MainClassHandler.firstPass(result, node.mainClass);
-		ClassDeclListHandler.firstpass(result, node.classList);
-	}
+  public void visit(Program node) {
+  }
 }

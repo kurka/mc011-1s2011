@@ -53,7 +53,7 @@ public final class Main {
       Start s = parser.parse();
 
       //Uncomment this to print sablecc's AST.
-      System.out.println(s);
+      //System.out.println(s);
 
       // ... up until here, classes and package organization
       // are decided by SableCC
