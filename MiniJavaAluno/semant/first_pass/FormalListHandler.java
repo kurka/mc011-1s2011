@@ -8,7 +8,6 @@ import symbol.Symbol;
 import symbol.ClassInfo;
 import symbol.MethodInfo;
 
-import syntaxtree.VisitorAdapter;
 import syntaxtree.MethodDecl;
 import syntaxtree.Formal;
 

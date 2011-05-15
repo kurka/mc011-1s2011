@@ -8,18 +8,18 @@ import symbol.Symbol;
 import symbol.ClassInfo;
 import symbol.MethodInfo;
 
-import syntaxtree.VisitorAdapter;
 import syntaxtree.MethodDecl;
 import syntaxtree.Formal;
+import syntaxtree.VarDecl;
 
 
 /**
  * Handler de lista de variaveis.
  * Nao eh de fato um visitor, apenas um involucro para lidar com a lista.
  */
-class FormalListHandler {
+class VarDeclListHandler {
 
-  private FormalListHandler() {
+  private VarDeclListHandler() {
     super();
   }
 
@@ -28,7 +28,10 @@ class FormalListHandler {
    * variáveis de uma classe.
    */
   static void firstPass(Env e, ClassInfo c, List<VarDecl> varList) {
-    // TODO
+    // Chama o firstPass do VarDeclHandler para cada variavel da classe
+    for (List<VarDecl> v = varList; v != null; v = v.tail) {
+      VarDeclHandler.firstPass(e, c, null, v.head); // Note que nao ha MethodInfo
+    }
   }
 
   /**
@@ -36,6 +39,9 @@ class FormalListHandler {
    * locals (variáveis locais) de um método.
    */
   static void firstPass(Env e, ClassInfo c, MethodInfo m, List<VarDecl> locals) {
-    // TODO
+    // Chama o firstPass do VarDeclHandler para cada variavel da classe
+    for (List<VarDecl> v = locals; v != null; v = v.tail) {
+      VarDeclHandler.firstPass(e, c, m, v.head);
+    }
   }
 }

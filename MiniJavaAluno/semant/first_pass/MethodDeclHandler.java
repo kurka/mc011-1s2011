@@ -35,7 +35,7 @@ class MethodDeclHandler extends VisitorAdapter {
     FormalListHandler.firstPass(env, parentClass, method, node.formals);
 
     // Chama o firstPass() para os locals
-    //VarDeclListHandler.firstPass(env, parentClass, method, node.locals);
+    VarDeclListHandler.firstPass(env, parentClass, method, node.locals);
 
     // Adiciona o metodo na classe
     if (!parentClass.addMethod(method)) {

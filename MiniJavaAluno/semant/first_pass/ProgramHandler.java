@@ -28,7 +28,7 @@ class ProgramHandler extends VisitorAdapter {
     MainClassHandler.firstPass(result, node.mainClass);
 
     // And then call firstPass() for ClasDeclList
-    //ClassDesclListHandler.firstPass(result, node.classList);
+    ClassDeclListHandler.firstPass(result, node.classList);
   }
 
 }
