@@ -12,7 +12,7 @@ public class TypeChecker {
 
   public static Env TypeCheck(ErrorEchoer err, Program p) {
     Env e = FirstPass.firstPass(err, p);
-    //SecondPass.secondPass(e, p);
-    return null;
+    SecondPass.secondPass(e, p);
+    return e;
   }
 }
