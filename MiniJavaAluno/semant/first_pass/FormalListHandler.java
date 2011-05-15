@@ -26,8 +26,7 @@ class FormalListHandler {
   static void firstPass(Env e, ClassInfo c, MethodInfo m, List<Formal> formals) {
     // Chama o firstPass do FormalHandler para cada formal da lista.
     for (List<Formal> f = formals; f != null; f = f.tail) {
-      System.out.println("Formal: " + f.head);
-      //FormalHandler.firstPass(e, c, m, f.head);
+      FormalHandler.firstPass(e, c, m, f.head);
     }
   }
 }
