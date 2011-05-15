@@ -1,9 +1,7 @@
 package minijava;
 
-import java.util.*;
-import java.io.PrintStream;
-import minijava.node.*;
-import minijava.analysis.*;
+import minijava.analysis.DepthFirstAdapter;
+import minijava.node.Node;
 
 public class UglyPrint extends DepthFirstAdapter
 {

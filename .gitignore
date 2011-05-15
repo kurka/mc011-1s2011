@@ -1,1 +1,8 @@
 Modern.Compiler.Implementation.in.Java.pdf
+MiniJavaAluno/.classpath
+MiniJavaAluno/.project
+MiniJavaAluno/bin
+MiniJavaAluno/minijava/analysis
+MiniJavaAluno/minijava/lexer
+MiniJavaAluno/minijava/node
+MiniJavaAluno/minijava/parser

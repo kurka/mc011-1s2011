@@ -3,34 +3,16 @@ package main;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.PushbackReader;
-
-import assem.Instr;
-
-import canon.BasicBlocks;
-import canon.Canon;
-import canon.TraceSchedule;
-
-import errors.ErrorEchoer;
-import frame.Frame;
-import frame.Proc;
-
-import semant.Env;
-import semant.TypeChecker;
-import syntaxtree.Program;
-import syntaxtree.PrettyPrint;
-import translate.Frag;
-import translate.ProcFrag;
-import translate.Translate;
-import translate.VtableFrag;
-import util.List;
-import util.conversor.SyntaxTreeGenerator;
 
 import minijava.lexer.Lexer;
 import minijava.node.Start;
 import minijava.parser.Parser;
+import semant.Env;
+import semant.TypeChecker;
+import syntaxtree.Program;
+import util.conversor.SyntaxTreeGenerator;
+import errors.ErrorEchoer;
 
 // Uma coisa nao especificada em minijava eh se
 // subclasses podem redeclarar atributos.

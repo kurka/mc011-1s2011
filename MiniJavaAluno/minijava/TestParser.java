@@ -1,8 +1,10 @@
 package minijava;
-import minijava.parser.*;
-import minijava.lexer.*;
-import minijava.node.*;
-import java.io.*;
+import java.io.InputStreamReader;
+import java.io.PushbackReader;
+
+import minijava.lexer.Lexer;
+import minijava.node.Start;
+import minijava.parser.Parser;
 
 public class TestParser { 
 
