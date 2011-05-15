@@ -18,8 +18,9 @@ class ProgramHandler extends VisitorAdapter {
 
   // Methods
   static Env firstPass(ErrorEchoer err, Program p) {
-    System.out.println("firstPass do ProgramHandler");
-    return null;
+    ProgramHandler h = new ProgramHandler(err);
+    p.accept(h);
+    return h.result;
   }
 
   public void visit(Program node) {
@@ -27,7 +28,7 @@ class ProgramHandler extends VisitorAdapter {
     MainClassHandler.firstPass(result, node.mainClass);
 
     // And then call firstPass() for ClasDeclList
-    ClassDesclListHandler.firstPass(result, node.classList);
+    //ClassDesclListHandler.firstPass(result, node.classList);
   }
 
 }
