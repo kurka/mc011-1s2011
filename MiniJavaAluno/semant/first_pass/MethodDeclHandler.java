@@ -55,4 +55,3 @@ class MethodDeclHandler extends VisitorAdapter {
   }
 
 }
-
