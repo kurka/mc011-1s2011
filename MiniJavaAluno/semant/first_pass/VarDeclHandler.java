@@ -43,7 +43,8 @@ class VarDeclHandler extends VisitorAdapter {
       ////////////////////////
 
       if (!parentClass.addAttribute(data)) {
-        System.out.println("Não conseguiu inserir atributo da classe. DO SOMETHING");
+        String msg = "Redeclaração do atributo " + key + " na classe " + parentClass.name;
+        env.err.Error(node, new Object[]{msg});
       }
     }
     else {
@@ -53,7 +54,8 @@ class VarDeclHandler extends VisitorAdapter {
       //////////////////////////////
 
       if (!parentMethod.addLocal(data)) {
-        System.out.println("Não conseguiu inserir variavel local do método. DO SOMETHING");
+        String msg = "Redeclaração da variavel " + key + " no metodo " + parentMethod.name;
+        env.err.Error(node, new Object[]{msg});
       }
     }
   }

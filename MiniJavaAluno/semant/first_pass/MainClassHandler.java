@@ -46,7 +46,7 @@ class MainClassHandler extends VisitorAdapter {
     Identifier methodId = new Identifier(node.line, node.row, "main");
 
     //// Precisamos criar as listas dos formals e o body.
-    Type methodArgType = new IdentifierType(node.line, node.row, "String[]");
+    Type methodArgType = new IdentifierType(node.line, node.row, "String []");
     Formal methodArg = new Formal(node.line, node.row, methodArgType, node.mainArgName);
     List<Formal> methodFormalList = new List<Formal>(methodArg, null);
     List<Statement> methodStatementList = new List<Statement>(node.s, null);
