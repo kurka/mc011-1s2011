@@ -51,7 +51,6 @@ class MethodDeclHandler extends VisitorAdapter {
         env.err.Error(node, new Object[]{msg});
       }
     }
-
   }
 
 }

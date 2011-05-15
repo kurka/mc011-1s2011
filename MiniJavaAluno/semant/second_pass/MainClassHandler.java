@@ -22,7 +22,7 @@ class MainClassHandler extends VisitorAdapter {
   }
 
   public void visit(MainClass node) {
-    System.out.println("2pass: visitando main class: " + node.className.s);
+    System.out.println("  2pass: visitando main class: " + node.className.s);
   }
 
 }

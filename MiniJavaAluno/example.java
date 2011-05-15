@@ -13,3 +13,11 @@ class Fac {
 		return num_aux;
 	}
 }
+
+class A extends B {
+}
+
+class B extends C {
+}
+class C extends A {
+}

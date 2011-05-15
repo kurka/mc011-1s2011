@@ -2,7 +2,7 @@ package semant;
 
 import syntaxtree.Program;
 import semant.first_pass.FirstPass;
-//import semant.second_pass.SecondPass;
+import semant.second_pass.SecondPass;
 import errors.ErrorEchoer;
 
 public class TypeChecker {
