@@ -25,7 +25,8 @@ public class ClassDeclHandler extends VisitorAdapter{
 	public void visit(ClassDeclSimple node) {
 		Symbol key = Symbol.symbol(node.name.s);
 		ClassInfo classInfo = env.classes.get(key);
-		
+
+		MethodDeclListHandler.secondPass(env, classInfo, node.methodList);
 	}
 
 	public void visit(ClassDeclExtends node) {
