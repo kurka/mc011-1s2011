@@ -2,6 +2,7 @@ package semant.second_pass;
 
 import semant.Env;
 import symbol.ClassInfo;
+import symbol.MethodInfo;
 import symbol.Symbol;
 import syntaxtree.MethodDecl;
 import syntaxtree.Type;
@@ -25,9 +26,13 @@ public class MethodDeclHandler extends TypeVisitorAdapter {
 
 	public Type visit(MethodDecl node) {
 		Symbol key = Symbol.symbol(node.name.s);
+		MethodInfo data = parentClass.methods.get(key);
+
+		// Verifica os parametros (formals)
+		FormalListHandler.secondPass(env, parentClass, data, node.formals);
 		
 		// Verifica se o tipo retornado da expressao equivale ao da assinatura 
-		Type retExpType = ExpHandler.secondPass(env, parentClass, null, node.returnExp);
+		Type retExpType = ExpHandler.secondPass(env, parentClass, data, node.returnExp);
 		if (retExpType != node.returnType) {
 			env.err.Error(node, new Object[]{
 					"Tipo da expressao de retorno do metodo " + key + "invalido.",
