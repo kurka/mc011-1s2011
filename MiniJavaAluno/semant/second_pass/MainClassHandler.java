@@ -1,9 +1,9 @@
 package semant.second_pass;
 
-import util.List;
-
 import semant.Env;
 
+import symbol.ClassInfo;
+import symbol.Symbol;
 import syntaxtree.VisitorAdapter;
 import syntaxtree.MainClass;
 
@@ -23,6 +23,11 @@ class MainClassHandler extends VisitorAdapter {
 
   public void visit(MainClass node) {
     System.out.println("  2pass: visitando main class: " + node.className.s);
+    Symbol key = Symbol.symbol(node.className.s);
+    ClassInfo data = env.classes.get(key);
+
+    // Verifica o statement do metodo main().
+    StatementHandler.secondPass(env, data, null, node.s);
   }
 
 }

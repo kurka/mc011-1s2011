@@ -15,7 +15,7 @@ public final class SecondPass {
     InheritanceBuilder.secondPass(e, p);
 
     // Checagem do programa
-    //MainClassHandler.secondPass(e, p.mainClass);
-    //ClassDeclListHandler.secondPass(e, p.classList);
+    MainClassHandler.secondPass(e, p.mainClass);
+    ClassDeclListHandler.secondPass(e, p.classList);
   }
 }
