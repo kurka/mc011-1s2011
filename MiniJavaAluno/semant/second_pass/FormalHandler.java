@@ -39,6 +39,6 @@ public class FormalHandler extends TypeVisitorAdapter {
 					"Encontrado: " + node.type
 			});
 		}
-		return data.type;
+		return node.type = data.type;
 	}
 }

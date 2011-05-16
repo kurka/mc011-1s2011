@@ -3,10 +3,13 @@ package semant.second_pass;
 import semant.Env;
 import symbol.ClassInfo;
 import symbol.MethodInfo;
+import symbol.Symbol;
+import symbol.VarInfo;
 import syntaxtree.And;
 import syntaxtree.BooleanType;
 import syntaxtree.Equal;
 import syntaxtree.Exp;
+import syntaxtree.IdentifierExp;
 import syntaxtree.IntegerType;
 import syntaxtree.LessThan;
 import syntaxtree.Minus;
@@ -30,6 +33,19 @@ public class ExpHandler extends TypeVisitorAdapter {
 		parentMethod = m;
 	}
 
+	// Helper
+	private static VarInfo getVariable(ClassInfo c, MethodInfo m, Symbol key) {
+		// Procura primeiro no metodo
+		VarInfo data = m.formalsTable.get(key);
+
+		// Se nao estiver no metodo, deve ser um atributo da classe
+		if (data == null) {
+			data = c.attributes.get(key);
+		}
+
+		return data;
+	}
+
 	public static Type secondPass(Env e, ClassInfo c, MethodInfo m, Exp node) {
 		ExpHandler h = new ExpHandler(e, c, m);
 		return node.accept(h);
@@ -47,6 +63,23 @@ public class ExpHandler extends TypeVisitorAdapter {
 	//////////////////////
 	public Type visit(Equal node) {
 		return null;
+	}
+
+	//////////////////////////////
+	// IdentifierExp Expression //
+	//////////////////////////////
+	public Type visit(IdentifierExp node) {
+		Symbol key = Symbol.symbol(node.name.s);
+		VarInfo data = ExpHandler.getVariable(parentClass, parentMethod, key);
+		
+		// Identificador nao encontrado
+		if (data == null) {
+			env.err.Error(node, new Object[]{"Identificador " + key + "nao definido no contexto."});
+      // Simula que o identificador existe, com o tipo int.
+      return new IntegerType(node.line, node.row);
+		}
+		
+		return node.type = data.type;
 	}
 
 	/////////////////////////
