@@ -10,7 +10,7 @@ tests:
 	javac minijava/TestAst.java
 
 clean:
-	rm -rf minijava/analysis minijava/lexer minijava/node minijava/parser
+	#rm -rf minijava/analysis minijava/lexer minijava/node minijava/parser
 	rm --force */*/*.class
 	rm --force */*.class
 
