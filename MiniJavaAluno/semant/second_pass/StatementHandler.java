@@ -4,14 +4,16 @@ import semant.Env;
 import symbol.ClassInfo;
 import symbol.MethodInfo;
 import syntaxtree.Assign;
+import syntaxtree.BooleanType;
 import syntaxtree.If;
 import syntaxtree.Print;
 import syntaxtree.Statement;
+import syntaxtree.Type;
 import syntaxtree.VisitorAdapter;
 import syntaxtree.While;
 
 /**
- * Cada tipo de statement tera sua propria implementacao do visit().
+ * Cada statement tera sua propria implementacao do visit().
  */
 public class StatementHandler extends VisitorAdapter {
 	private Env env;
@@ -34,6 +36,18 @@ public class StatementHandler extends VisitorAdapter {
 	// While Statement //
 	/////////////////////
 	public void visit(While node) {
+		// Verifica o tipo da expressao de condicao
+		Type conditionType = ExpHandler.secondPass(env, parentClass, parentMethod, node.condition);
+		if (!(conditionType instanceof BooleanType)) {
+			env.err.Error(node, new Object[] {
+					"Tipo invalido para a condicao do WHILE.",
+					"Esperado: boolean",
+					"Encontrado: " + conditionType
+			});
+		}
+
+		// Chama secondPass() no body do while
+		StatementHandler.secondPass(env, parentClass, parentMethod, node.body);
 	}
 
 	//////////////////
