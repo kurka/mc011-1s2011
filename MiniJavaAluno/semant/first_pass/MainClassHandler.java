@@ -37,7 +37,6 @@ class MainClassHandler extends VisitorAdapter {
    * Para isso, prepara as informações, incluindo a criação direta do método main().
    */
   public void visit(MainClass node) {
-    System.out.println("Guardando main class: " + node.className.s + " na tabela.");
     Symbol classKey = Symbol.symbol(node.className.s);
     ClassInfo classData = new ClassInfo(classKey);
 

@@ -37,7 +37,6 @@ class FormalHandler extends VisitorAdapter {
   }
 
   public void visit(Formal node) {
-    System.out.println("Visitando formal: " + node + " no metodo " + parentMethod.name + " da classe " + parentMethod.parent);
     Symbol key = Symbol.symbol(node.name.s);
     VarInfo data = new VarInfo(node.type, key);
 

@@ -28,7 +28,6 @@ class ClassDeclHandler extends VisitorAdapter {
 	   * visit() method for ClassDeclSimple instance of ClassDecl.
 	   */
 	  public void visit(ClassDeclSimple node) {
-	    System.out.println("Visitando a classe simples: " + node.name.s);
 	    Symbol key = Symbol.symbol(node.name.s);
 	    ClassInfo data = new ClassInfo(key);
 
@@ -48,7 +47,6 @@ class ClassDeclHandler extends VisitorAdapter {
    * visit() method for ClassDeclExtends instance of ClassDecl.
    */
   public void visit(ClassDeclExtends node) {
-    System.out.println("Visitando a classe extendida: " + node.name.s);
     Symbol key = Symbol.symbol(node.name.s);
     ClassInfo data = new ClassInfo(key);
 

@@ -27,7 +27,6 @@ class MethodDeclHandler extends VisitorAdapter {
   }
 
   public void visit(MethodDecl node) {
-    System.out.println("Visitando o método: " + node.name.s + " na classe: " + parentClass.name);
     Symbol key = Symbol.symbol(node.name.s);
     MethodInfo method = new MethodInfo(node.returnType, key, parentClass.name);
 

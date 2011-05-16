@@ -23,14 +23,12 @@ public class ClassDeclHandler extends VisitorAdapter{
 	}
 
 	public void visit(ClassDeclSimple node) {
-		System.out.println("2nd pass: Visitando a classe simples: " + node.name.s);
 		Symbol key = Symbol.symbol(node.name.s);
 		ClassInfo classInfo = env.classes.get(key);
 		
 	}
 
 	public void visit(ClassDeclExtends node) {
-		System.out.println("2nd pass: Visitando a classe extendida: " + node.name.s);
 		Symbol key = Symbol.symbol(node.name.s);
 	}
 

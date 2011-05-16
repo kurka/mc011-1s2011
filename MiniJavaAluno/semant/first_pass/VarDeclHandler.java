@@ -29,9 +29,6 @@ class VarDeclHandler extends VisitorAdapter {
   }
 
   public void visit(VarDecl node) {
-    System.out.println("Visitando variavel: " + node);
-    System.out.println((parentMethod == null) ? " Atributo de "+parentClass.name : " Variavel local de "+parentMethod.name);
-
     Symbol key = Symbol.symbol(node.name.s);
     VarInfo data = new VarInfo(node.type, key);
 

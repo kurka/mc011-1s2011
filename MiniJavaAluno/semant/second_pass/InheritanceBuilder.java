@@ -24,25 +24,15 @@ class InheritanceBuilder extends VisitorAdapter {
 	}
 
 	static void secondPass(Env e, Program p) {
-		System.out.println("    secondPass chamando accept do node..");
 		InheritanceBuilder b = new InheritanceBuilder(e, p.classList);
 		p.accept(b);
 	}
 
 	public void visit(Program p) {
-		System.out.println("        Rodando visit do Inheritance, tendo recebido PROGRAM...");
-
-		for (List<ClassDecl> c = p.classList; c != null; c = c.tail) {
-			InheritanceBuilder b = new InheritanceBuilder(env, p.classList);
-			ClassDecl cd = c.head;
-			cd.accept(b);
-		}
-
+    // TODO
 	}
 
 	public void visit(ClassDeclExtends node) {
-		System.out.println("        Rodando visit do Inheritance...");
-
 		Symbol name = Symbol.symbol(node.name.s);
 		ClassInfo cinfo = env.classes.get(name);
 
