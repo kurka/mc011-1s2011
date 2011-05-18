@@ -1,0 +1,27 @@
+#!/bin/bash
+
+USAGE="usage: pp <pasta>"
+OUT="g04"
+
+# check if arg1 is present and is directory
+if [ $# -ne 1 ]
+then
+  echo $USAGE
+  exit
+fi
+
+if [ ! -d $1 ]
+then
+  echo $USAGE
+  exit
+fi
+
+# silently create dir (if exists, do not show error msg)
+mkdir $1/$OUT 2> /dev/null
+
+for i in $(ls $1/[0-9][0-9])
+do
+  FILE=${i#main/} # parse the input file name
+  echo "Processando $i..."
+  java main.Main < $i >> $1/$OUT/$FILE 2>> $1/$OUT/$FILE
+done
