@@ -59,8 +59,8 @@ public final class Main {
 
       // Now, we're using Appel's data structure.
       // Uncomment this if you wanto to print it here for debugging purposes.
-      PrettyPrint v1 = new PrettyPrint(System.err);
-      program.accept(v1);
+      //PrettyPrint v1 = new PrettyPrint(System.err);
+      //program.accept(v1);
 
       //----PROJETO-1: Chamada do pacote semantico ----------------------------------------------
 
