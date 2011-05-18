@@ -12,7 +12,7 @@ public final class SecondPass {
 
   public static void secondPass(Env e, Program p) {
     // Constroi a hierarquia de classes, verificando herancas circulares.
-    InheritanceBuilder.secondPass(e, p);
+    //InheritanceBuilder.secondPass(e, p);
 
     // Checagem do programa
     MainClassHandler.secondPass(e, p.mainClass);

@@ -27,10 +27,15 @@ public class MethodDeclHandler extends TypeVisitorAdapter {
 	public Type visit(MethodDecl node) {
 		Symbol key = Symbol.symbol(node.name.s);
 		MethodInfo data = parentClass.methods.get(key);
+	
+		// Verifica se o tipo de retorno de funcao sobrescrita eh igual ao pai
+		//if(!TypeHandler.compatible(env, data.type, node.returnType)){
+		//	System.out.println("ERRO");
+		//}
 
 		// Verifica os parametros (formals)
 		FormalListHandler.secondPass(env, parentClass, data, node.formals);
-		
+	
 		// Verifica se o tipo retornado da expressao equivale ao da assinatura 
 		Type retExpType = ExpHandler.secondPass(env, parentClass, data, node.returnExp);
 		if ((retExpType != null) && !TypeHandler.compatible(env, retExpType, node.returnType)){

@@ -25,45 +25,30 @@ class InheritanceBuilder extends VisitorAdapter {
 
 	static void secondPass(Env e, Program p) {
 		InheritanceBuilder b = new InheritanceBuilder(e, p.classList);
-		p.accept(b);
+		p.accept(b);//constroi arvore de herancas
+    
+		//// Checagem do restante do programa
+    	//MainClassHandler.secondPass(env, p.mainClass);
+    	//ClassDeclListHandler.secondPass(env, p.classList);
+
 	}
 
 	public void visit(Program p) {
-    // TODO
-	}
-
-	public void visit(ClassDeclExtends node) {
-		Symbol name = Symbol.symbol(node.name.s);
-		ClassInfo cinfo = env.classes.get(name);
-
-		Symbol base = Symbol.symbol(node.superClass.s);
-		ClassInfo sinfo = env.classes.get(base);
-
-		// Apenas para garantir que a classe existe e ainda nao foi setado seu base.
-		if (cinfo == null || cinfo.base == null) {
-			return;
-		}
-
-		// Caso em que uma classe herda de outra que nao existe
-		if (sinfo == null) {
-			String msg = "Classe " + name + " deriva de classe nao declarada: " + base;
-			env.err.Error(node, new Object[] {msg});
-		}
-		else {
-			
-			//FIXME: nao falta um helper(base) aqui?
-
-			// Classe pai existe. Checa heranca.
-
-			if (!TypeHandler.canInheritFrom(cinfo, sinfo)) {
-				String msg = "Heranca ciclica detectada entre " + name + " e " + base;
-				env.err.Error(node, new Object[] {msg});
-			}
-			else {
-				// Finalmente salva heranca
-				cinfo.setBase(sinfo);
+		//constroi a hierarquia das classes, usando setBase
+		for ( List<ClassDecl> aux = p.classList; aux != null; aux = aux.tail ){
+			if(aux.head instanceof ClassDeclExtends){
+				ClassDeclExtends node = (ClassDeclExtends) aux.head;
+				//encontra o filho em env
+				Symbol filho = Symbol.symbol(node.name.s);
+				ClassInfo cfilho = env.classes.get(filho);
+				//encontra o pai em env
+				Symbol base = Symbol.symbol(node.superClass.s);
+				ClassInfo cbase = env.classes.get(base);
+				cfilho.setBase(cbase);
 			}
 		}
-
+		// Checagem do restante do programa
+    	MainClassHandler.secondPass(env, p.mainClass);
+    	ClassDeclListHandler.secondPass(env, p.classList);
 	}
 }

@@ -52,8 +52,7 @@ final class TypeHandler {
 	  ClassInfo c1 = e.classes.get(nc1);
 	  ClassInfo c2 = e.classes.get(nc2);
 
-      return false;
-	  //return compatible(e, c1, c2);
+	  return compatible(e, c1, c2);
   }
 
   //checa compatibilidade entre classes com nomes diferentes (mas possivelmente mesmo tipo)

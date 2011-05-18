@@ -10,6 +10,7 @@ import syntaxtree.BooleanType;
 import syntaxtree.Equal;
 import syntaxtree.Exp;
 import syntaxtree.IdentifierExp;
+import syntaxtree.IdentifierType;
 import syntaxtree.IntegerType;
 import syntaxtree.LessThan;
 import syntaxtree.Minus;
@@ -51,7 +52,6 @@ public class ExpHandler extends TypeVisitorAdapter {
 		// Se nao estiver no metodo, deve ser um atributo da classe
 		if (data == null) {
 			data = c.attributes.get(key);
-			//TODO: procurar nas classes pais tb
 		}
 
 		return data;
@@ -126,16 +126,54 @@ public class ExpHandler extends TypeVisitorAdapter {
 	// Minus Expression //
 	//////////////////////
 	public Type visit(Minus node) {
-		//TODO
-		return null;
+		// Verifica tipo da expressao da esquerda
+		Type lhsType = ExpHandler.secondPass(env, parentClass, parentMethod, node.lhs);
+		if (!(lhsType instanceof IntegerType)) {
+			env.err.Error(node.lhs, new Object[]{
+					"Tipo do operando esquerdo de MINUS invalido",
+					"Esperado: int",
+					"Encontrado: " + lhsType
+			});
+		}
+
+		// Verifica tipo da expressao da direita
+		Type rhsType = ExpHandler.secondPass(env, parentClass, parentMethod, node.rhs);
+		if (!(rhsType instanceof IntegerType)) {
+			env.err.Error(node.lhs, new Object[]{
+					"Tipo do operando direito de MINUS invalido",
+					"Esperado: int",
+					"Encontrado: " + rhsType
+			});
+		}
+		
+		return node.type = new IntegerType(node.line, node.row);
 	}
 
 	/////////////////////
 	// Plus Expression //
 	/////////////////////
 	public Type visit(Plus node) {
-		//TODO
-		return null;
+		// Verifica tipo da expressao da esquerda
+		Type lhsType = ExpHandler.secondPass(env, parentClass, parentMethod, node.lhs);
+		if (!(lhsType instanceof IntegerType)) {
+			env.err.Error(node.lhs, new Object[]{
+					"Tipo do operando esquerdo de PLUS invalido",
+					"Esperado: int",
+					"Encontrado: " + lhsType
+			});
+		}
+
+		// Verifica tipo da expressao da direita
+		Type rhsType = ExpHandler.secondPass(env, parentClass, parentMethod, node.rhs);
+		if (!(rhsType instanceof IntegerType)) {
+			env.err.Error(node.lhs, new Object[]{
+					"Tipo do operando direito de PLUS invalido",
+					"Esperado: int",
+					"Encontrado: " + rhsType
+			});
+		}
+		
+		return node.type = new IntegerType(node.line, node.row);
 	}
 
 	//////////////////////
@@ -153,14 +191,78 @@ public class ExpHandler extends TypeVisitorAdapter {
 	{
 		return node.type = new IntegerType(node.line, node.row);
 	}
+
+
+	//////////////////////
+	// This  Expression //
+	//////////////////////
+	public Type visit(This node)
+	{
+		return node.type = new IdentifierType(node.line, node.row, parentClass.name.toString());
+	}
+	
+	//////////////////////
+	// Call  Expression //
+	//////////////////////
+	//public Type visit(Call node)
+	//{
+	//	Type t = ExpHandler.secondPass(env, parentClass, parentMethod, node.object);
+	//	Symbol m = Symbol.symbol(node.method.s);
+//
+//		if(!(t instanceof IdentifierType)){
+///			env.err.Error(node, new Object[]{
+//					"Chamada de metodo aplicada a tipo invalido",
+//					"Esperado: id",
+//					"Encontrado: " + t
+//			});
+//			return node.type = new IntegerType(node.line, node.row);
+//		}
+//
+//		IdentifierType tt = (IdentifierType) t;
+//		MethodInfo mi = getMethod(Symbol.symbol(tt.name), m);
+//
+//		if(mi==null){
+//			env.err.Error(node, new Object[]{
+//				"Metodo " + m + " nao definido para classe \'" + tt.name + "\'"
+//			});
+//			return node.type = new IntegerType(node.line, node.row);
+//		}
+//
+//		//verificando os parametros
+//		List<Type> actuals = ExpListHandler.secondPass(env, parentClass, parentMethod, node.actuals); 
+//		List<VarInfo> formals;
+//		int i;
+//		for(formals = mi.formals, i=1; actuals != null && formals != null; actuals = actuals.tail, formals = formals.tail, i++){
+//			if(!TypeHandler.compatible(env, formals.head.type, actuals.head))
+//				env.err.Error(node, new Object[]{
+//						"Tipo do argumento #" + i + " para o metodo " + tt.name + "." + mi.name + "nao eh compativel.",
+//						"Esperado: " + formals.head.type,
+//						"Encontrado: " + actuals.head
+//						});
+//		}
+//
+//		if(actuals != null || formals != null)
+//			env.err.Error(node, new Object[]{
+//				"Numero de parametros invalidos para o metodo " + tt.name + "." + mi.name + "."
+//			});
+//
+//		return node.type;
+//	}
+//
+//
+//	public MethodInfo getMethod(Symbol objeto, Symbol metodo){
+//		Symbol key = Symbol.symbol(node.name.s);
+//		ClassInfo iclass = env.classes.get(objeto);
+//		MethodInfo imetodo = iclass.methods.get(metodo);
+//		return imetodo;
+//	}
+
 }
-    //TODO?
+    //TODO
 	//{not} [token]:not [value]:exp |
     //{array_length} [array]:exp [token]:tok_length |
-    //{call} [object]:exp [method]:id [actuals]:exp* |
     //{array_lookup} [array]:exp [token]:l_brack [index]:exp |
     //{true} [token]:tok_true |
     //{false} [token]:tok_false |
-    //{this} [token]:tok_this |
     //{new_array} [token]:tok_new [size]:exp |
     //{new_object} [name]:id;
