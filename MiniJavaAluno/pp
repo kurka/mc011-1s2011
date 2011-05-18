@@ -1,0 +1,37 @@
+#!/bin/bash
+
+USAGE="usage: pp <pasta>"
+GYY="g04"
+
+# check if arg1 is present and is directory
+if [ $# -ne 1 ]
+then
+  echo $USAGE
+  exit
+fi
+
+if [ ! -d $1 ]
+then
+  echo $USAGE
+  exit
+fi
+
+# silently create dir (if exists, do not show error msg)
+mkdir $1/$GYY 2> /dev/null
+
+# create global output file
+echo "$GYY ---------------------------" > $1/gall/$GYY.out
+
+for i in $(ls $1/[0-9][0-9])
+do
+  FILE=${i#main/} # parse the input file name
+  echo "Processando $i..."
+
+  # generate single output files
+  java main.Main < $i >> $1/$GYY/$FILE.out 2>> $1/$GYY/$FILE.out
+
+  # also, concatenate file to global output
+  echo $FILE >> $1/gall/$GYY.out
+  cat $1/$GYY/$FILE.out >> $1/gall/$GYY.out
+  echo "" >> $1/gall/$GYY.out
+done
