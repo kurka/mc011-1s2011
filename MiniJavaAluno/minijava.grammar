@@ -124,17 +124,17 @@ producao {-> objeto_gerado} =
       r_brace
       {-> New method_decl( returntype.type, methodid, [formals.formal], [locals.var_decl], [body.statement], returnexp.exp)};
 
-  formallist {-> formal} =
+  formallist {-> formal*} =
     formal formaltail*
+      {-> [formal.formal, formaltail.formal]};
+
+  formaltail {-> formal} =
+    comma formal
       {-> formal.formal};
 
   formal {-> formal} =
     type id
       {-> New formal(type.type, id)};
-
-  formaltail {-> formal} =
-    comma formal
-      {-> formal.formal};
 
   type {-> type} =
     {int_array_type} tok_int l_brack r_brack {-> New type.array(tok_int)} |
