@@ -50,6 +50,9 @@ class InheritanceBuilder extends VisitorAdapter {
 			env.err.Error(node, new Object[] {msg});
 		}
 		else {
+			
+			//FIXME: nao falta um helper(base) aqui?
+
 			// Classe pai existe. Checa heranca.
 
 			if (!TypeHandler.canInheritFrom(cinfo, sinfo)) {

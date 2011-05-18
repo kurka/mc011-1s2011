@@ -1,5 +1,5 @@
 all:
-	java -jar sablecc-3.2/lib/sablecc.jar minijava.grammar
+	#java -jar sablecc-3.2/lib/sablecc.jar minijava.grammar
 	javac main/Main.java
 
 tests:

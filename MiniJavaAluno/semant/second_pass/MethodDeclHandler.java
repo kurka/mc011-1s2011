@@ -33,13 +33,14 @@ public class MethodDeclHandler extends TypeVisitorAdapter {
 		
 		// Verifica se o tipo retornado da expressao equivale ao da assinatura 
 		Type retExpType = ExpHandler.secondPass(env, parentClass, data, node.returnExp);
-		if (retExpType != node.returnType) {
+		if ((retExpType != null) && !TypeHandler.compatible(env, retExpType, node.returnType)){
 			env.err.Error(node, new Object[]{
-					"Tipo da expressao de retorno do metodo " + key + "invalido.",
+					"Tipo da expressao de retorno do metodo " + key + " invalido.",
 					"Esperado: " + node.returnType,
 					"Encontrado: " + retExpType
 			});
 		}
 		return node.returnType;
 	}
+
 }

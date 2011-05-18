@@ -15,6 +15,16 @@ import syntaxtree.LessThan;
 import syntaxtree.Minus;
 import syntaxtree.Plus;
 import syntaxtree.Times;
+import syntaxtree.IntegerLiteral;
+import syntaxtree.Not;
+import syntaxtree.ArrayLength;
+import syntaxtree.ArrayLookup;
+import syntaxtree.Call;
+import syntaxtree.True;
+import syntaxtree.False;
+import syntaxtree.This;
+import syntaxtree.NewArray;
+import syntaxtree.NewObject;
 import syntaxtree.Type;
 import syntaxtree.TypeVisitorAdapter;
 
@@ -41,6 +51,7 @@ public class ExpHandler extends TypeVisitorAdapter {
 		// Se nao estiver no metodo, deve ser um atributo da classe
 		if (data == null) {
 			data = c.attributes.get(key);
+			//TODO: procurar nas classes pais tb
 		}
 
 		return data;
@@ -55,6 +66,7 @@ public class ExpHandler extends TypeVisitorAdapter {
 	// And Expression //
 	////////////////////
 	public Type visit(And node) {
+		//TODO
 		return null;
 	}
 
@@ -62,6 +74,7 @@ public class ExpHandler extends TypeVisitorAdapter {
 	// Equal Expression //
 	//////////////////////
 	public Type visit(Equal node) {
+		//TODO
 		return null;
 	}
 
@@ -75,8 +88,8 @@ public class ExpHandler extends TypeVisitorAdapter {
 		// Identificador nao encontrado
 		if (data == null) {
 			env.err.Error(node, new Object[]{"Identificador " + key + "nao definido no contexto."});
-      // Simula que o identificador existe, com o tipo int.
-      return new IntegerType(node.line, node.row);
+			// Simula que o identificador existe, com o tipo int.
+			return new IntegerType(node.line, node.row);
 		}
 		
 		return node.type = data.type;
@@ -113,6 +126,7 @@ public class ExpHandler extends TypeVisitorAdapter {
 	// Minus Expression //
 	//////////////////////
 	public Type visit(Minus node) {
+		//TODO
 		return null;
 	}
 
@@ -120,6 +134,7 @@ public class ExpHandler extends TypeVisitorAdapter {
 	// Plus Expression //
 	/////////////////////
 	public Type visit(Plus node) {
+		//TODO
 		return null;
 	}
 
@@ -127,7 +142,25 @@ public class ExpHandler extends TypeVisitorAdapter {
 	// Times Expression //
 	//////////////////////
 	public Type visit(Times node) {
+		//TODO
 		return null;
 	}
 
+	////////////////////////////////
+	// integerLiteral  Expression //
+	////////////////////////////////
+	public Type visit(IntegerLiteral node)
+	{
+		return node.type = new IntegerType(node.line, node.row);
+	}
 }
+    //TODO?
+	//{not} [token]:not [value]:exp |
+    //{array_length} [array]:exp [token]:tok_length |
+    //{call} [object]:exp [method]:id [actuals]:exp* |
+    //{array_lookup} [array]:exp [token]:l_brack [index]:exp |
+    //{true} [token]:tok_true |
+    //{false} [token]:tok_false |
+    //{this} [token]:tok_this |
+    //{new_array} [token]:tok_new [size]:exp |
+    //{new_object} [name]:id;

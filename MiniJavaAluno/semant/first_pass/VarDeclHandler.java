@@ -55,6 +55,7 @@ class VarDeclHandler extends VisitorAdapter {
         env.err.Error(node, new Object[]{msg});
       }
     }
+
   }
 
 }

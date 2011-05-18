@@ -54,18 +54,21 @@ public class StatementHandler extends VisitorAdapter {
 	// If Statement //
 	//////////////////
 	public void visit(If node) {
+		//TODO
 	}
 
 	//////////////////////
 	// Assign Statement //
 	//////////////////////
 	public void visit(Assign node) {
+		//TODO
 	}
 
 	/////////////////////
 	// Print Statement //
 	/////////////////////
 	public void visit(Print node) {
+		//TODO
 	}
 	
 }
