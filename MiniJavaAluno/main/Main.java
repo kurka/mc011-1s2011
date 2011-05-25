@@ -72,6 +72,9 @@ public final class Main {
         err.Print(new Object[]{err.ErrorCount() + " erros", err.WarningCount() + " avisos"});
         return;
       }
+      else {
+        System.out.println("Sucesso");
+      }
 
     }
     catch(Throwable e) {

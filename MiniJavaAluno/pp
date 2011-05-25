@@ -18,13 +18,14 @@ fi
 
 # silently create dir (if exists, do not show error msg)
 mkdir $1/$GYY 2> /dev/null
+mkdir $1/gall 2> /dev/null
 
 # create global output file
 echo "$GYY ---------------------------" > $1/gall/$GYY.out
 
-for i in $(ls $1/[0-9][0-9])
+for i in $(ls $1/in/[0-9][0-9])
 do
-  FILE=${i#main/} # parse the input file name
+  FILE=${i##*/} # parse the input file name
   echo "Processando $i..."
 
   # generate single output files

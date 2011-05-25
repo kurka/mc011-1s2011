@@ -23,6 +23,7 @@ public class ClassInfo
     
     public Vector<Symbol> attributesOrder;
     public Vector<Symbol> vtableIndex;
+
     
 	public ClassInfo(Symbol n)
 	{

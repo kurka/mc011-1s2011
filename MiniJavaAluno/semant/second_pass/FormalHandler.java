@@ -30,9 +30,14 @@ public class FormalHandler extends TypeVisitorAdapter {
 	public Type visit(Formal node) {
 		Symbol key = Symbol.symbol(node.name.s);
 		VarInfo data = parentMethod.formalsTable.get(key);
-
+		
+		if (data == null) {
+			// Nao encontrou o formal - retorna o tipo do node
+			return node.type;
+		}
+		
 		// Verifica se os tipos correspondem
-		if (!node.type.toString().equals(data.type.toString())) {
+		if (!TypeHandler.compatible(env, node.type, data.type)) {
 			env.err.Error(node, new Object[]{
 					"Tipo do parametro " + key + "invalido.",
 					"Esperado: " + data.type,

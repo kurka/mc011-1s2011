@@ -1,0 +1,4 @@
+[1,1] expecting: 'class'
+minijava.parser.ParserException: [1,1] expecting: 'class'
+	at minijava.parser.Parser.parse(Parser.java:671)
+	at main.Main.main(Main.java:36)

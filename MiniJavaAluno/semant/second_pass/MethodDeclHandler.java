@@ -1,12 +1,14 @@
 package semant.second_pass;
 
 import semant.Env;
+import semant.MethodSymbol;
 import symbol.ClassInfo;
 import symbol.MethodInfo;
 import symbol.Symbol;
 import syntaxtree.MethodDecl;
 import syntaxtree.Type;
 import syntaxtree.TypeVisitorAdapter;
+import java.util.Enumeration;
 
 public class MethodDeclHandler extends TypeVisitorAdapter {
 
@@ -25,7 +27,8 @@ public class MethodDeclHandler extends TypeVisitorAdapter {
 	}
 
 	public Type visit(MethodDecl node) {
-		Symbol key = Symbol.symbol(node.name.s);
+		//Symbol key = Symbol.symbol(node.name.s);
+		Symbol key = MethodSymbol.getSymbol(node);
 		MethodInfo data = parentClass.methods.get(key);
 	
 		// Verifica se o tipo de retorno de funcao sobrescrita eh igual ao pai
@@ -35,7 +38,7 @@ public class MethodDeclHandler extends TypeVisitorAdapter {
 
 		// Verifica os parametros (formals)
 		FormalListHandler.secondPass(env, parentClass, data, node.formals);
-	
+		
 		// Verifica se o tipo retornado da expressao equivale ao da assinatura 
 		Type retExpType = ExpHandler.secondPass(env, parentClass, data, node.returnExp);
 		if ((retExpType != null) && !TypeHandler.compatible(env, retExpType, node.returnType)){

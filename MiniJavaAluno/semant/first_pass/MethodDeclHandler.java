@@ -1,6 +1,7 @@
 package semant.first_pass;
 
 import semant.Env;
+import semant.MethodSymbol;
 
 import symbol.Symbol;
 import symbol.ClassInfo;
@@ -27,8 +28,11 @@ class MethodDeclHandler extends VisitorAdapter {
   }
 
   public void visit(MethodDecl node) {
-    Symbol key = Symbol.symbol(node.name.s);
-    MethodInfo method = new MethodInfo(node.returnType, key, parentClass.name);
+
+
+	  Symbol key = MethodSymbol.getSymbol(node);
+	  //Symbol key = Symbol.symbol(node.name.s);
+	  MethodInfo method = new MethodInfo(node.returnType, key, parentClass.name);
 
     // Chama o firstPass() para os formals
     FormalListHandler.firstPass(env, parentClass, method, node.formals);
@@ -44,8 +48,8 @@ class MethodDeclHandler extends VisitorAdapter {
       if (existent == null) {
         throw new NullPointerException("Metodo supostamente existente nao encontrado.");
       }
-      else {
-        String msg = "Metodo \'" + key + "\' previamente declarado na classe \'" + 
+      else { 
+        String msg = "Metodo \'" + MethodSymbol.methodName(key) + "\' previamente declarado na classe \'" + 
           parentClass.name + "\' em [" + existent.type.line + "," + existent.type.row + "]";
         env.err.Error(node, new Object[]{msg});
       }
