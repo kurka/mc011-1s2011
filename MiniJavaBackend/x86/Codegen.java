@@ -67,7 +67,8 @@ public class Codegen
 	}	
 
 	private void munchExpStm(EXPSTM s){
-		Temp exp = munchExp(s);
+		Temp exp = munchExp(s.exp);
+		//TODO: emit(...)
 		return;
 	}
 
