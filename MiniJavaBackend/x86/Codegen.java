@@ -69,13 +69,16 @@ public class Codegen {
     }
   }
 
+  /**
+   * mov [`s0] `s1
+   */
   private void munchMove(MEM d, Exp s) {
     Temp val = munchExp(s);
-    Temp add = munchExp(d.exp);
+    Temp address = munchExp(d.exp);
 
-    emit(new assem.OPER("mov ['s0], 's1",
+    emit(new assem.OPER("mov [`s0], `s1",
                         null,
-                        new List<Temp>(add, new List<Temp>(val, null))));
+                        new List<Temp>(address, new List<Temp>(val, null))));
     return;
   }
 
