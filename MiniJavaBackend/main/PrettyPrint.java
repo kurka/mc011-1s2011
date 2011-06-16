@@ -125,9 +125,6 @@ public final class PrettyPrint
                       Stm stm = stm_list.head;
                       new PrintIR(System.out).printStatement(stm);
                     }
-
-                    // Instruction Selection is done                   
-                    List<Instr> instrs = p.frame.codegen(ts.stms);
                 }
             }
 		}
