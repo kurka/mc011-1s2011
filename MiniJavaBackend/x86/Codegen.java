@@ -94,9 +94,7 @@ public class Codegen {
   }
 
   private void munchExpStm(EXPSTM s) {
-    Temp exp = munchExp(s.exp);
-    //TODO: emit(...)
-    return;
+    munchExp(s.exp);
   }
 
   private void munchCjump(CJUMP s) {
@@ -124,10 +122,34 @@ public class Codegen {
   }
 
   private Temp munchExp(Exp e) {
-    //TODO
+
+    if (e instanceof BINOP) {
+      return munchExpBinop((BINOP) e);
+    }
+
+    // If only remain (e instanceof TEMP), directly create a new Temp
     return new Temp();
   }
 
+
+  private Temp munchExpBinop(BINOP e) {
+    Temp left = munchExp(e.left);
+    Temp right = munchExp(e.right);
+
+    Temp ret = new Temp();
+
+    // Por enquanto, trata apenas as SOMAS
+    switch (e.binop) {
+      case BINOP.PLUS:
+        emit(new assem.OPER("add `d0 `s1",
+                            new List<Temp>(ret, null),
+                            new List<Temp>(left, new List<Temp>(right, null))));
+        break;
+    }
+
+
+    return ret;
+  }
 
   /*-------------------------------------------------------------*
    *                              MAIN                           *
