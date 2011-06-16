@@ -24,14 +24,14 @@ public class Codegen {
 
   Frame frame;
   public Codegen(Frame f) {
-    frame=f;
+    frame = f;
   }
 
   private List<Instr> ilist = null;
   private List<Instr> last = null;
 
   private void emit(Instr inst) {
-    if (last!=null) {
+    if (last != null) {
       last = last.tail = new List<Instr>(inst,null);
     }
     else {
@@ -82,10 +82,13 @@ public class Codegen {
     return;
   }
 
+  /**
+   * mov `d0 `s0
+   */
   private void munchMove(TEMP d, Exp s) {
     Temp val = munchExp(s);
-    emit(new assem.OPER("mov 'd0, 's0",
-                        new List<Temp>(d, null),
+    emit(new assem.OPER("mov `d0, `s0",
+                        new List<Temp>(d.temp, null),
                         new List<Temp>(val, null)));
     return;
   }
@@ -122,6 +125,7 @@ public class Codegen {
 
   private Temp munchExp(Exp e) {
     //TODO
+    return new Temp();
   }
 
 
