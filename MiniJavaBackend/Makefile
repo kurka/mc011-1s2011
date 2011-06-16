@@ -1,5 +1,7 @@
 all:
+	javac syntaxtree/TypeVisitorAdapter.java
 	javac main/Main.java
+	javac main/PrettyPrint.java
 
 clean:
 	rm --force assem/*.class

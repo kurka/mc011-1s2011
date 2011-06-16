@@ -1,0 +1,4 @@
+#!/bin/bash
+
+## Usage: ./runPrettyPrint < file.java
+java main.PrettyPrint
