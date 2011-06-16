@@ -7,3 +7,4 @@ MiniJavaAluno/minijava/lexer
 MiniJavaAluno/minijava/node
 MiniJavaAluno/minijava/parser
 MiniJavaBackend/*.jar
+MiniJavaBackend/minijava.asm
