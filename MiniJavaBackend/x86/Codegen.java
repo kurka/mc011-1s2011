@@ -164,17 +164,28 @@ public class Codegen {
     Temp right = munchExp(e.right);
 
     // Por enquanto, trata apenas as SOMAS
-    switch (e.binop) {
-      case BINOP.PLUS:
-        emit(new assem.OPER("add `d0 `s1",
-                            new List<Temp>(left, null),
-                            new List<Temp>(left, new List<Temp>(right, null))));
-        break;
+    if (e.binop == BINOP.PLUS){
+		munchExpBinopAdd(e, left, right);
     }
-
 
     return left;
   }
+	
+  private void munchExpBinopAdd(BINOP e, Temp left, Temp right){
+    if(right instanceof CONST){
+      String asm = String.format("addi `d0 %ld", right.value)
+        emit(new assem.OPER(asm,
+                          new List<Temp>(left, null),
+                          new List<Temp>(left, null)));
+    }
+    else{
+      emit(new assem.OPER("addi `d0 `s0",
+                        new List<Temp>(left, null),
+                        new List<Temp>(left, new List<Temp>(right, null))));
+    }
+    return;
+  }
+       
   
   private Temp munchExpCall(CALL e){
   //TODO
