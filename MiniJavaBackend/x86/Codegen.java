@@ -121,6 +121,10 @@ public class Codegen {
     return;
   }
 
+  /**
+   * Generic method that call specific methods 
+   * in order to tile an Exp.
+   */
   private Temp munchExp(Exp e) {
     if (e instanceof BINOP) {
       return munchExpBinop((BINOP) e);
@@ -147,6 +151,7 @@ public class Codegen {
     else {
       throw new Error("Unexpected: " + e.getClass());
     }
+    return null; // this will never happen, but javac requires this return
   }
 
   /**
@@ -154,7 +159,7 @@ public class Codegen {
    */
   private Temp munchExpConst(CONST e) {
     Temp ret = new Temp();
-    String asm = sprintf("mov `d0 %l", e.value);
+    String asm = String.format("mov `d0 %ld", e.value);
     emit(new assem.MOVE(asm, ret, null));
     return ret;
   }
@@ -258,6 +263,25 @@ public class Codegen {
   private Temp munchExpName(NAME e){
   //TODO
   }
+
+  private Temp munchExpEseq(ESEQ e) {
+    munchStm(e.stm);
+    return munchExp(e.exp);
+  }
+
+  private Temp munchExpCall(CALL e) {
+    // TODO
+  }
+
+  private Temp munchExpMem(MEM e) {
+    // TODO
+  }
+
+  private Temp munchExpName(NAME e) {
+    // TODO
+  }
+
+
 
   /*-------------------------------------------------------------*
    *                              MAIN                           *
