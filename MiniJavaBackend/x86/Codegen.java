@@ -121,6 +121,10 @@ public class Codegen {
     return;
   }
 
+  /**
+   * Generic method that call specific methods 
+   * in order to tile an Exp.
+   */
   private Temp munchExp(Exp e) {
     if (e instanceof BINOP) {
       return munchExpBinop((BINOP) e);
@@ -147,6 +151,7 @@ public class Codegen {
     else {
       throw new Error("Unexpected: " + e.getClass());
     }
+    return null; // this will never happen, but javac requires this return
   }
 
   /**
