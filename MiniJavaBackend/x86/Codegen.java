@@ -149,19 +149,17 @@ public class Codegen {
     Temp left = munchExp(e.left);
     Temp right = munchExp(e.right);
 
-    Temp ret = new Temp();
-
     // Por enquanto, trata apenas as SOMAS
     switch (e.binop) {
       case BINOP.PLUS:
         emit(new assem.OPER("add `d0 `s1",
-                            new List<Temp>(ret, null),
+                            new List<Temp>(left, null),
                             new List<Temp>(left, new List<Temp>(right, null))));
         break;
     }
 
 
-    return ret;
+    return left;
   }
 
   /*-------------------------------------------------------------*
