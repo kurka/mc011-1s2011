@@ -154,7 +154,7 @@ public class Codegen {
    */
   private Temp munchExpConst(CONST e) {
     Temp ret = new Temp();
-    String asm = sprintf("mov `d0 %d", e.value);
+    String asm = sprintf("mov `d0 %l", e.value);
     emit(new assem.MOVE(asm, ret, null));
     return ret;
   }
