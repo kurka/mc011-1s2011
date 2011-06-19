@@ -247,23 +247,6 @@ public class Codegen {
     return;
   }
        
-  
-  private Temp munchExpCall(CALL e){
-  //TODO
-  }
-  private Temp munchExpConst(CONST e){
-  //TODO
-  }
-  private Temp munchExpEseq(ESEQ e){
-  //TODO
-  }
-  private Temp munchExpMem(MEM e){
-  //TODO
-  }
-  private Temp munchExpName(NAME e){
-  //TODO
-  }
-
   private Temp munchExpEseq(ESEQ e) {
     munchStm(e.stm);
     return munchExp(e.exp);
