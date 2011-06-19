@@ -141,7 +141,6 @@ public class Codegen {
       return munchExpName((NAME) e);
     }
     else if (e instanceof TEMP) {
-      //return munchExpTemp((TEMP) e);
       //If only remain (e instanceof TEMP), directly create a new Temp
       return new Temp();
     }
@@ -175,6 +174,22 @@ public class Codegen {
 
 
     return left;
+  }
+  
+  private Temp munchExpCall(CALL e){
+  //TODO
+  }
+  private Temp munchExpConst(CONST e){
+  //TODO
+  }
+  private Temp munchExpEseq(ESEQ e){
+  //TODO
+  }
+  private Temp munchExpMem(MEM e){
+  //TODO
+  }
+  private Temp munchExpName(NAME e){
+  //TODO
   }
 
   /*-------------------------------------------------------------*
