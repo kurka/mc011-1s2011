@@ -162,27 +162,83 @@ public class Codegen {
   private Temp munchExpBinop(BINOP e) {
     Temp left = munchExp(e.left);
     Temp right = munchExp(e.right);
+    Temp tleft, tright;
+    String lstr, rstr, instrstr;
 
-    // Por enquanto, trata apenas as SOMAS
+    //1- get instruction name
     if (e.binop == BINOP.PLUS){
-		munchExpBinopAdd(e, left, right);
+		instrstr = "add";
+    }
+    else if (e.binop == BINOP.MINUS){
+        instrstr = "sub";
+    }
+    else if (e.binop == BINOP.TIMES){
+        instrstr = "mul"; //FIXME??
+    }
+    else if (e.binop == BINOP.DIV){
+        instrstr = "div"; //FIXME??
+    }
+    else if (e.binop == BINOP.AND){
+        instrstr = "and";
+    }
+    else if (e.binop == BINOP.OR){
+        instrstr = "or";
+    }
+    else if (e.binop == BINOP.LSHIFT){
+        instrstr = "sal"; //??
+    }
+    else if (e.binop == BINOP.RSHIFT){
+        instrstr = "sar"; //??
+    }
+    else if (e.binop == BINOP.ARSHIFT){
+        instrstr = "sar"; //??
+    }
+    else if (e.binop == BINOP.XOR){
+        instrstr = "xor"; //??
+    }
+    else {
+      throw new Error("Unexpected: " + e.getClass() + " in munchExpBinop");
     }
 
-    return left;
-  }
-	
-  private void munchExpBinopAdd(BINOP e, Temp left, Temp right){
-    if(right instanceof CONST){
-      String asm = String.format("addi `d0 %ld", right.value)
-        emit(new assem.OPER(asm,
-                          new List<Temp>(left, null),
-                          new List<Temp>(left, null)));
+
+    //2- get left text
+    if (left instanceof TEMP) {
+      tleft = left;
+      lstr = "`d0";
     }
-    else{
-      emit(new assem.OPER("addi `d0 `s0",
+    else if (left instanceof MEM) {
+      //FIXME: jeito burro
+      tleft = munchExpMem(left);
+      lstr = "`d0";
+    }
+    else {
+      throw new Error("Unexpected: " + left.getClass() + " in munchExpBinopAdd");
+    }
+
+    //3- get right text
+    if (right instanceof TEMP){
+      tright = right;
+      rstr = "`s0";
+    }
+    else if (right instanceof MEM) {
+      //FIXME: jeito burro
+      tright = munchExpMem(right);
+      rstr = "`s0";
+    }
+    else if (right instanceof CONST){
+      //FIXME: jeito burro
+      tright = munchExpConst(right);
+      rstr = "`s0"
+    }
+    else {
+      throw new Error("Unexpected: " + right.getClass() + " in munchExpBinopAdd");
+    }
+
+    String asm = String.format(instrstr + " " + lstr + ", " + rstr);
+    
+    emit(new assem.OPER(asm,
                         new List<Temp>(left, null),
                         new List<Temp>(left, new List<Temp>(right, null))));
-    }
     return;
   }
        
