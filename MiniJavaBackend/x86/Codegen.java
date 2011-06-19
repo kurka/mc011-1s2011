@@ -122,28 +122,43 @@ public class Codegen {
   }
 
   private Temp munchExp(Exp e) {
-
-    if (e instanceof BINOP)
+    if (e instanceof BINOP) {
       return munchExpBinop((BINOP) e);
-    else if (e instanceof CALL)
+    }
+    else if (e instanceof CALL) {
       return munchExpCall((CALL) e);
-    else if (e instanceof CONST)
+    }
+    else if (e instanceof CONST) {
       return munchExpConst((CONST) e);
-    else if (e instanceof ESEQ)
+    }
+    else if (e instanceof ESEQ) {
       return munchExpEseq((ESEQ) e);
-    else if (e instanceof MEM)
+    }
+    else if (e instanceof MEM) {
       return munchExpMem((MEM) e);
-    else if (e instanceof NAME)
+    }
+    else if (e instanceof NAME) {
       return munchExpName((NAME) e);
-    else if (e instanceof TEMP)
+    }
+    else if (e instanceof TEMP) {
       //return munchExpTemp((TEMP) e);
       //If only remain (e instanceof TEMP), directly create a new Temp
       return new Temp();
-    else
+    }
+    else {
       throw new Error("Unexpected: " + e.getClass());
-
+    }
   }
 
+  /**
+   * Tile an individual CONST Exp
+   */
+  private Temp munchExpConst(CONST e) {
+    Temp ret = new Temp();
+    String asm = sprintf("mov `d0 %d", e.value);
+    emit(new assem.MOVE(asm, ret, null));
+    return ret;
+  }
 
   private Temp munchExpBinop(BINOP e) {
     Temp left = munchExp(e.left);
