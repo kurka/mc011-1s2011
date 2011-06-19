@@ -123,12 +123,25 @@ public class Codegen {
 
   private Temp munchExp(Exp e) {
 
-    if (e instanceof BINOP) {
+    if (e instanceof BINOP)
       return munchExpBinop((BINOP) e);
-    }
+    else if (e instanceof CALL)
+      return munchExpCall((CALL) e);
+    else if (e instanceof CONST)
+      return munchExpConst((CONST) e);
+    else if (e instanceof ESEQ)
+      return munchExpEseq((ESEQ) e);
+    else if (e instanceof MEM)
+      return munchExpMem((MEM) e);
+    else if (e instanceof NAME)
+      return munchExpName((NAME) e);
+    else if (e instanceof TEMP)
+      //return munchExpTemp((TEMP) e);
+      //If only remain (e instanceof TEMP), directly create a new Temp
+      return new Temp();
+    else
+      throw new Error("Unexpected: " + e.getClass());
 
-    // If only remain (e instanceof TEMP), directly create a new Temp
-    return new Temp();
   }
 
 
