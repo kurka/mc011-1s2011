@@ -151,7 +151,6 @@ public class Codegen {
     else {
       throw new Error("Unexpected: " + e.getClass());
     }
-    return null; // this will never happen, but javac requires this return
   }
 
   /**
@@ -164,13 +163,13 @@ public class Codegen {
     return ret;
   }
 
+  /**
+   *  binop `d0, `s0
+   */
   private Temp munchExpBinop(BINOP e) {
-    Temp left = munchExp(e.left);
-    Temp right = munchExp(e.right);
-    Temp tleft, tright;
-    String lstr, rstr, instrstr;
+    String instrstr;
 
-    //1- get instruction name
+    //get instruction name
     if (e.binop == BINOP.PLUS){
 		instrstr = "add";
     }
@@ -178,10 +177,10 @@ public class Codegen {
         instrstr = "sub";
     }
     else if (e.binop == BINOP.TIMES){
-        instrstr = "mul"; //FIXME??
+        instrstr = "mul"; //FIXME: according to doc, just need one arg
     }
     else if (e.binop == BINOP.DIV){
-        instrstr = "div"; //FIXME??
+        instrstr = "div"; //FIXME: according to doc, just need one arg
     }
     else if (e.binop == BINOP.AND){
         instrstr = "and";
@@ -206,45 +205,16 @@ public class Codegen {
     }
 
 
-    //2- get left text
-    if (left instanceof TEMP) {
-      tleft = left;
-      lstr = "`d0";
-    }
-    else if (left instanceof MEM) {
-      //FIXME: jeito burro
-      tleft = munchExpMem(left);
-      lstr = "`d0";
-    }
-    else {
-      throw new Error("Unexpected: " + left.getClass() + " in munchExpBinopAdd");
-    }
+    //FIXME: dumb way. don't need to call munchExp and get a new temporary everytime.
+    Temp left = munchExp(e.left);
+    Temp right = munchExp(e.right);
 
-    //3- get right text
-    if (right instanceof TEMP){
-      tright = right;
-      rstr = "`s0";
-    }
-    else if (right instanceof MEM) {
-      //FIXME: jeito burro
-      tright = munchExpMem(right);
-      rstr = "`s0";
-    }
-    else if (right instanceof CONST){
-      //FIXME: jeito burro
-      tright = munchExpConst(right);
-      rstr = "`s0"
-    }
-    else {
-      throw new Error("Unexpected: " + right.getClass() + " in munchExpBinopAdd");
-    }
-
-    String asm = String.format(instrstr + " " + lstr + ", " + rstr);
+    String asm = String.format(instrstr + " `d0, `s0");
     
     emit(new assem.OPER(asm,
                         new List<Temp>(left, null),
                         new List<Temp>(left, new List<Temp>(right, null))));
-    return;
+    return left;
   }
        
   private Temp munchExpEseq(ESEQ e) {
@@ -253,14 +223,17 @@ public class Codegen {
   }
 
   private Temp munchExpCall(CALL e) {
+    return new Temp();
     // TODO
   }
 
   private Temp munchExpMem(MEM e) {
+    return new Temp();
     // TODO
   }
 
   private Temp munchExpName(NAME e) {
+    return new Temp();
     // TODO
   }
 
