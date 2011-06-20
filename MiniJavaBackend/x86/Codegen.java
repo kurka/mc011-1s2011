@@ -239,8 +239,11 @@ public class Codegen {
   }
 
   private Temp munchExpName(NAME e) {
-    return new Temp();
-    // TODO
+    Temp ret = new Temp();
+    emit(new assem.OPER("mov `d0, " + e.label.toString(),
+                        new List<Temp>(ret, null),
+                        null));
+    return ret;
   }
 
 
