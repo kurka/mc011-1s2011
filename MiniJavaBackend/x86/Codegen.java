@@ -100,6 +100,7 @@ public class Codegen {
   private void munchCjump(CJUMP s) {
     //TODO
   }
+
   private void munchLabel(LABEL s) {
     emit(new assem.LABEL(s.toString() + ":", s.label)); 
   }
@@ -229,8 +230,12 @@ public class Codegen {
   }
 
   private Temp munchExpMem(MEM e) {
-    return new Temp();
-    // TODO
+    Temp ret = new Temp();
+    Temp exp = munchExp(e.exp);//FIXME: there are more efficient ways to solve the expression
+    emit(new assem.OPER("mov `d0, [`s0]",
+                        new List<Temp>(ret, null),
+                        new List<Temp>(exp, null)));
+    return ret;
   }
 
   private Temp munchExpName(NAME e) {
