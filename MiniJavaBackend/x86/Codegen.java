@@ -101,8 +101,9 @@ public class Codegen {
     //TODO
   }
   private void munchLabel(LABEL s) {
-    //TODO
+    emit(new assem.LABEL(s.toString() + ":", s.label)); 
   }
+
   private void munchJump(JUMP s) {
     if (s.exp instanceof NAME) {
       NAME l = (NAME) s.exp;
