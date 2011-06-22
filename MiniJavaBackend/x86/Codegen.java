@@ -147,7 +147,7 @@ public class Codegen {
    */
   private void munchLabel(LABEL s) {
     System.out.println("munchLabel");
-    emit(new assem.LABEL(s.label.toString() + ":", s.label)); 
+    emit(new assem.LABEL(s.label.toString() + ":", s.label));
   }
 
   /**
@@ -185,7 +185,7 @@ public class Codegen {
   }
 
   /**
-   * Generic method that call specific methods 
+   * Generic method that call specific methods
    * in order to tile an Exp.
    */
   private Temp munchExp(Exp e) {
@@ -223,7 +223,7 @@ public class Codegen {
   private Temp munchConst(CONST e) {
     System.out.println("munchConst");
     Temp ret = new Temp();
-    emit(new assem.OPER("mov `d0, " + e.value, 
+    emit(new assem.OPER("mov `d0, " + e.value,
                     new List<Temp>(ret,null),
                     null));
     return ret;
@@ -259,7 +259,7 @@ public class Codegen {
         instrstr = "shl";
     }
     else if (e.binop == BINOP.RSHIFT){
-        instrstr = "shr"; 
+        instrstr = "shr";
     }
     else if (e.binop == BINOP.ARSHIFT){
         instrstr = "sar"; //??
@@ -277,13 +277,13 @@ public class Codegen {
     Temp right = munchExp(e.right);
 
     String asm = String.format(instrstr + " `d0, `s1");
-    
+
     emit(new assem.OPER(asm,
                         new List<Temp>(left, null),
                         new List<Temp>(left, new List<Temp>(right, null))));
     return left;
   }
-       
+
   /**
    * EXP ESEQ
    */
