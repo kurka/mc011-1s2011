@@ -329,7 +329,7 @@ public class Codegen {
                         new List<Temp>(frame.esp, null),
                         new List<Temp>(frame.esp, null)));
     //get the return value
-	ret = new Temp();
+	Temp ret = new Temp();
     emit(new assem.MOVE("mov `d0, eax", ret, frame.eax));
     return ret;
   }
