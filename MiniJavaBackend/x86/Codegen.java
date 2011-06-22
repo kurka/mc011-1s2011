@@ -321,16 +321,17 @@ public class Codegen {
     Temp funcAdd = munchExp(e.func);
     emit(new assem.OPER("call `s0",
                         null,
-                        new List<Temp>(funcAdd, null)));
+                        new List<Temp>(funcAdd, frame.callDefs)));
 
 
     //restore the stack
     emit(new assem.OPER("add esp, " + (numArgs*4),
-                        null,
-                        null));
+                        new List<Temp>(frame.esp, null),
+                        new List<Temp>(frame.esp, null));
     //get the return value
-    //TODO
-    return new Temp();
+	ret = new Temp();
+    emit(new assem.MOVE("mov `d0, eax", ret, frame.eax);
+    return ret;
   }
 
   private Temp munchExpMem(MEM e) {
