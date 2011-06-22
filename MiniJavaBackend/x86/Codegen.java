@@ -93,9 +93,8 @@ public class Codegen {
   private void munchMove(TEMP d, Exp s) {
     System.out.println("munchMove2");
     Temp val = munchExp(s);
-    emit(new assem.OPER("mov `d0, `s0",
-                        new List<Temp>(d.temp, null),
-                        new List<Temp>(val, null)));
+    emit(new assem.MOVE("mov `d0, `s0",
+                        d.temp, val));
     return;
   }
 
@@ -225,7 +224,7 @@ public class Codegen {
     Temp left = munchExp(e.left);
     Temp right = munchExp(e.right);
 
-    String asm = String.format(instrstr + " `d0, `s0");
+    String asm = String.format(instrstr + " `d0, `s1");
     
     emit(new assem.OPER(asm,
                         new List<Temp>(left, null),
