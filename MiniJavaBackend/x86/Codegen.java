@@ -40,6 +40,9 @@ public class Codegen {
     }
   }
 
+  /**
+   * Generic method to "tile" a Statement
+   */
   private void munchStm (Stm s) {
     System.out.println(">munchStm");
     if (s instanceof MOVE) {
@@ -56,6 +59,9 @@ public class Codegen {
     }
     else if (s instanceof JUMP) {
       munchJump((JUMP) s);
+    }
+    else if (s instanceof SEQ) {
+      munchSeq((SEQ) s);
     }
     else {
       throw new Error("Unhandled: " + s.getClass());
@@ -78,7 +84,6 @@ public class Codegen {
 
   /**
    * MOVE MEM <- ?
-   *  mov [ ], ?
    */
   private void munchMove(MEM d, Exp s) {
     System.out.println("munchMove1");
@@ -92,7 +97,7 @@ public class Codegen {
   }
 
   /**
-   * mov `d0 `s0
+   * MOVE TEMP <- ?
    */
   private void munchMove(TEMP d, Exp s) {
     System.out.println("munchMove2");
@@ -140,6 +145,19 @@ public class Codegen {
                           s.targets));
     }
     return;
+  }
+
+  /**
+   * SEQ
+   *
+   * Eg.:
+   * b = 0;
+   * (a = b + 10, b++); <- SEQ Stm
+   * No return value
+   */
+  private munchSeq(SEQ s) {
+    munchStm(s.left);
+    munchStm(s.right);
   }
 
   /**
