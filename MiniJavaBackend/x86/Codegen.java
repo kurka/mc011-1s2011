@@ -318,19 +318,19 @@ public class Codegen {
     }
 
     //do the call expression
-    Temp funcAdd = munchExp(e.func);
+    Temp funcAdd = munchExp(e.func);//FIXME: dumb way
     emit(new assem.OPER("call `s0",
                         null,
-                        new List<Temp>(funcAdd, frame.callDefs)));
+                        new List<Temp>(funcAdd, frame.calldefs)));
 
 
     //restore the stack
     emit(new assem.OPER("add esp, " + (numArgs*4),
                         new List<Temp>(frame.esp, null),
-                        new List<Temp>(frame.esp, null));
+                        new List<Temp>(frame.esp, null)));
     //get the return value
 	ret = new Temp();
-    emit(new assem.MOVE("mov `d0, eax", ret, frame.eax);
+    emit(new assem.MOVE("mov `d0, eax", ret, frame.eax));
     return ret;
   }
 
