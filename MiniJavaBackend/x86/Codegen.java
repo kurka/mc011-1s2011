@@ -63,6 +63,9 @@ public class Codegen {
     System.out.println(">saindo do munchStm");
   }
 
+  /**
+   * MOVE
+   */
   private void munchMove(MOVE s) {
     System.out.println("munchMove");
     if (s.dst instanceof MEM) {
@@ -74,7 +77,8 @@ public class Codegen {
   }
 
   /**
-   * mov [`s0] `s1
+   * MOVE MEM <- ?
+   *  mov [ ], ?
    */
   private void munchMove(MEM d, Exp s) {
     System.out.println("munchMove1");
@@ -98,6 +102,9 @@ public class Codegen {
     return;
   }
 
+  /**
+   * EXPSTM
+   */
   private void munchExpStm(EXPSTM s) {
     System.out.println("munchExpStm");
     munchExp(s.exp);
@@ -108,6 +115,9 @@ public class Codegen {
     //TODO
   }
 
+  /**
+   * LABEL
+   */
   private void munchLabel(LABEL s) {
     System.out.println("munchLabel");
     emit(new assem.LABEL(s.label.toString() + ":", s.label)); 
