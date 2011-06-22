@@ -5,6 +5,8 @@ import tree.*;
 import temp.*;
 import util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Performs instruction selection for x86.
@@ -83,10 +85,10 @@ public class Codegen {
   }
 
   /**
-   * MOVE MEM <- ?
+   * MOVE MEM <- VALUE
    */
   private void munchMove(MEM d, Exp s) {
-    System.out.println("munchMove1");
+    System.out.println("munchMoveMem");
     Temp val = munchExp(s);
     Temp address = munchExp(d.exp);
 
@@ -97,10 +99,10 @@ public class Codegen {
   }
 
   /**
-   * MOVE TEMP <- ?
+   * MOVE TEMP <- VALUE
    */
   private void munchMove(TEMP d, Exp s) {
-    System.out.println("munchMove2");
+    System.out.println("munchMoveTemp");
     Temp val = munchExp(s);
     emit(new assem.MOVE("mov `d0, `s0",
                         d.temp, val));
@@ -115,9 +117,39 @@ public class Codegen {
     munchExp(s.exp);
   }
 
+  /**
+   * CJUMP
+   */
   private void munchCjump(CJUMP s) {
     System.out.println("munchCjump");
-    //TODO
+    Temp left = munchExp(s.left);
+    Temp right = munchExp(s.right);
+
+    // Emit cmp instruction, to set the Machine Status Word.
+    emit(new assem.OPER("cmp `s0 `s1",
+                        null,
+                        new List<Temp>(left, new List<Temp>(right, null))));
+
+    // Build a dictionary to relate CJUMP comparison type and x86 instruction.
+    HashMap<Integer,String> dict = new HashMap<Integer, String>();
+    dict.put(CJUMP.EQ, "je");
+    dict.put(CJUMP.NE, "jne");
+    dict.put(CJUMP.LT, "jl");
+    dict.put(CJUMP.LE, "jle");
+    dict.put(CJUMP.GT, "jg");
+    dict.put(CJUMP.GE, "jge");
+
+    // Now,  find which instruction we need
+    String instr = dict.get(s.op);
+    if (instr == null) {
+      throw new Error("Invalid CJUMP op: " + s.op);
+    }
+
+    // Emit cjump instruction ("cjump LABEL") using ifTrue Label
+    emit(new assem.OPER(instr + " `j0",
+                        null,
+                        null,
+                        new List<Label>(s.ifTrue, null)));
   }
 
   /**
@@ -132,7 +164,7 @@ public class Codegen {
     System.out.println("munchJump");
     if (s.exp instanceof NAME) {
       NAME l = (NAME) s.exp;
-      emit(new assem.OPER("jmp 'j0",
+      emit(new assem.OPER("jmp `j0",
                           null,
                           null,
                           new List<Label>(l.label, null)));
@@ -155,7 +187,7 @@ public class Codegen {
    * (a = b + 10, b++); <- SEQ Stm
    * No return value
    */
-  private munchSeq(SEQ s) {
+  private void munchSeq(SEQ s) {
     munchStm(s.left);
     munchStm(s.right);
   }
