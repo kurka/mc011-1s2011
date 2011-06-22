@@ -252,10 +252,10 @@ public class Codegen {
         instrstr = "sub";
     }
     else if (e.binop == BINOP.TIMES){
-        instrstr = "mul"; //FIXME: according to doc, just need one arg
+        instrstr = "imul";
     }
     else if (e.binop == BINOP.DIV){
-        instrstr = "div"; //FIXME: according to doc, just need one arg
+        instrstr = "idiv";
     }
     else if (e.binop == BINOP.AND){
         instrstr = "and";
@@ -264,16 +264,16 @@ public class Codegen {
         instrstr = "or";
     }
     else if (e.binop == BINOP.LSHIFT){
-        instrstr = "sal"; //??
+        instrstr = "shl";
     }
     else if (e.binop == BINOP.RSHIFT){
-        instrstr = "sar"; //??
+        instrstr = "shr"; 
     }
     else if (e.binop == BINOP.ARSHIFT){
         instrstr = "sar"; //??
     }
     else if (e.binop == BINOP.XOR){
-        instrstr = "xor"; //??
+        instrstr = "xor";
     }
     else {
       throw new Error("Unexpected: " + e.getClass() + " in munchExpBinop");
