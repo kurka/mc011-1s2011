@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]
+then
+  echo "usage: ./runMain testes/ok/1.java"
+  exit
+fi
+
+# Create minijava.asm
+java main.Main < $1
+
+# Create minijava.o
+nasm -felf minijava.asm
+
+# Create runtime.o
+gcc -march=i386 -m32 -c runtime/runtime.c
+
+# Put minijava.o and runtime.o together on mc011.o
+gcc -march=i386 -m32 minijava.o runtime.o -o mc011.o
+
+./mc011.o
