@@ -210,7 +210,8 @@ public class Codegen {
     }
     else if (e instanceof TEMP) {
       //If only remain (e instanceof TEMP), directly create a new Temp
-      return new Temp();
+      TEMP t = (TEMP) e;
+      return t.temp;
     }
     else {
       throw new Error("Unexpected: " + e.getClass());
