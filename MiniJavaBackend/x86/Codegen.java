@@ -34,7 +34,7 @@ public class Codegen {
    * Generic method to "tile" a Statement
    */
   private void munchStm(Stm s) {
-    System.out.println(">munchStm");
+    System.out.println("entrando em munchStm");
     if (s instanceof MOVE) {
       munchMove((MOVE) s);
     }
@@ -56,20 +56,21 @@ public class Codegen {
     else {
       throw new Error("Unhandled: " + s.getClass());
     }
-    System.out.println(">saindo do munchStm");
+    System.out.println("saindo de munchStm");
   }
 
   /**
    * STM MOVE
    */
   private void munchMove(MOVE s) {
-    System.out.println("munchMove");
+    System.out.println("entrando em munchMove");
     if (s.dst instanceof MEM) {
       munchMove((MEM) s.dst, s.src);
     }
     else {
       munchMove((TEMP) s.dst, s.src);
     }
+    System.out.println("saindo de munchMove");
   }
 
   /**
@@ -77,14 +78,17 @@ public class Codegen {
    * MEM <- VALUE
    */
   private void munchMove(MEM d, Exp s) {
-    System.out.println("munchMoveMem");
+    System.out.println("entrando em munchMoveMem");
     Temp val = munchExp(s);
+
+    // NEM sempre entra no munchExp para cálculo do address.
+    // TODO: checar se a expressão é uma binop
     Temp address = munchExp(d.exp);
 
     emit(new assem.OPER("mov [`s0], `s1",
                         null,
                         new List<Temp>(address, new List<Temp>(val, null))));
-    return;
+    System.out.println("saindo de munchMoveMem");
   }
 
   /**
@@ -92,26 +96,27 @@ public class Codegen {
    * TEMP <- VALUE
    */
   private void munchMove(TEMP d, Exp s) {
-    System.out.println("munchMoveTemp");
+    System.out.println("entrando em munchMoveTemp");
     Temp val = munchExp(s);
     emit(new assem.MOVE("mov `d0, `s0",
                         d.temp, val));
-    return;
+    System.out.println("saindo de munchMoveTemp");
   }
 
   /**
    * STM EXPSTM
    */
   private void munchExpStm(EXPSTM s) {
-    System.out.println("munchExpStm");
+    System.out.println("entrando em munchExpStm");
     munchExp(s.exp);
+    System.out.println("saindo de munchExpStm");
   }
 
   /**
    * STM CJUMP
    */
   private void munchCjump(CJUMP s) {
-    System.out.println("munchCjump");
+    System.out.println("entrando em munchCjump");
     Temp left = munchExp(s.left);
     Temp right = munchExp(s.right);
 
@@ -140,21 +145,23 @@ public class Codegen {
                         null,
                         null,
                         new List<Label>(s.ifTrue, null)));
+    System.out.println("saindo de munchCjump");
   }
 
   /**
    * STM LABEL
    */
   private void munchLabel(LABEL s) {
-    System.out.println("munchLabel");
+    System.out.println("entrando em munchLabel");
     emit(new assem.LABEL(s.label.toString() + ":", s.label));
+    System.out.println("saindo de munchLabel");
   }
 
   /**
    * STM JUMP
    */
   private void munchJump(JUMP s) {
-    System.out.println("munchJump");
+    System.out.println("entrando em munchJump");
     if (s.exp instanceof NAME) {
       NAME l = (NAME) s.exp;
       emit(new assem.OPER("jmp `j0",
@@ -169,6 +176,7 @@ public class Codegen {
                           new List<Temp>(target,null),
                           s.targets));
     }
+    System.out.println("saindo de munchJump");
   }
 
   /**
@@ -180,8 +188,10 @@ public class Codegen {
    * No return value
    */
   private void munchSeq(SEQ s) {
+    System.out.println("entrando em munchSeq");
     munchStm(s.left);
     munchStm(s.right);
+    System.out.println("saindo de munchSeq");
   }
 
   /**
@@ -189,7 +199,7 @@ public class Codegen {
    * in order to tile an Exp.
    */
   private Temp munchExp(Exp e) {
-    System.out.println("munchExp");
+    System.out.println("entrando em munchExp");
     if (e instanceof BINOP) {
       return munchBinop((BINOP) e);
     }
@@ -209,24 +219,24 @@ public class Codegen {
       return munchName((NAME) e);
     }
     else if (e instanceof TEMP) {
-      //If only remain (e instanceof TEMP), directly create a new Temp
-      TEMP t = (TEMP) e;
-      return t.temp;
+      return munchTemp((TEMP) e);
     }
     else {
       throw new Error("Unexpected: " + e.getClass());
     }
+    System.out.println("saindo de munchExp");
   }
 
   /**
    * EXP CONST
    */
   private Temp munchConst(CONST e) {
-    System.out.println("munchConst");
+    System.out.println("entrando em munchConst");
     Temp ret = new Temp();
     emit(new assem.OPER("mov `d0, " + e.value,
                     new List<Temp>(ret,null),
                     null));
+    System.out.println("saindo de munchConst");
     return ret;
   }
 
@@ -234,7 +244,7 @@ public class Codegen {
    * EXP BINOP
    */
   private Temp munchBinop(BINOP e) {
-    System.out.println("munchBinop");
+    System.out.println("entrando em munchBinop");
     String instrstr;
 
     //get instruction name
@@ -282,6 +292,7 @@ public class Codegen {
     emit(new assem.OPER(asm,
                         new List<Temp>(left, null),
                         new List<Temp>(left, new List<Temp>(right, null))));
+    System.out.println("saindo de munchBinop");
     return left;
   }
 
@@ -289,8 +300,9 @@ public class Codegen {
    * EXP ESEQ
    */
   private Temp munchEseq(ESEQ e) {
-    System.out.println("munchEseq");
+    System.out.println("entrando em munchEseq");
     munchStm(e.stm);
+    System.out.println("saindo de munchEseq");
     return munchExp(e.exp);
   }
 
@@ -298,7 +310,7 @@ public class Codegen {
    * EXP CALL
    */
   private Temp munchCall(CALL e) {
-    System.out.println("munchCall");
+    System.out.println("entrando em munchCall");
     //find the amount of params that will go to stack
     ArrayList<Exp> reversedParams = new ArrayList<tree.Exp>();
     int numArgs = 0;
@@ -330,6 +342,7 @@ public class Codegen {
     //get the return value
     Temp ret = new Temp();
     emit(new assem.MOVE("mov `d0, eax", ret, frame.eax));
+    System.out.println("saindo de munchCall");
     return ret;
   }
 
@@ -337,12 +350,14 @@ public class Codegen {
    * EXP MEM
    */
   private Temp munchMem(MEM e) {
-    System.out.println("munchMem");
+    System.out.println("entrando em munchMem");
     Temp ret = new Temp();
     Temp exp = munchExp(e.exp);//FIXME: there are more efficient ways to solve the expression
+    // TODO [eax +- 12]
     emit(new assem.OPER("mov `d0, [`s0]",
                         new List<Temp>(ret, null),
                         new List<Temp>(exp, null)));
+    System.out.println("saindo de munchMem");
     return ret;
   }
 
@@ -350,12 +365,22 @@ public class Codegen {
    * EXP NAME
    */
   private Temp munchName(NAME e) {
-    System.out.println("munchName");
+    System.out.println("entrando em munchName");
     Temp ret = new Temp();
     emit(new assem.OPER("mov `d0, " + e.label.toString(),
                         new List<Temp>(ret, null),
                         null));
+    System.out.println("saindo de munchName");
     return ret;
+  }
+
+  /**
+   * EXP TEMP
+   */
+  private Temp munchTemp(TEMP e) {
+    System.out.println("entrando em munchTemp");
+    System.out.println("saindo de munchTemp");
+    return e.temp;
   }
 
 
@@ -364,7 +389,6 @@ public class Codegen {
    *                              MAIN                           *
    *-------------------------------------------------------------*/
   List<Instr> codegen(Stm s) {
-    System.out.println("1 codegen");
 	List<Instr> l;
     munchStm(s);
     l = ilist;
@@ -373,7 +397,6 @@ public class Codegen {
   }
 
   List<Instr> codegen(List<Stm> body) {
-    System.out.println("2 codegen");
     List<Instr> l = null, t = null;
 
     for( ; body != null; body = body.tail ) {
@@ -387,7 +410,6 @@ public class Codegen {
       t = last;
       ilist=last=null;
     }
-    System.out.println("saindo do codegen 2");
     return l;
   }
 }
