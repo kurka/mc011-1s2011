@@ -25,6 +25,8 @@ public class Liveness extends InterferenceGraph
     private Hashtable<Node, HashSet<Temp>> out;
     private Hashtable<Node, HashSet<Temp>> gen;
     private Hashtable<Node, HashSet<Temp>> kill;
+    private Hashtable<Node, HashSet<Temp>> inprime;
+    private Hashtable<Node, HashSet<Temp>> outprime;
         
     public void show(PrintStream o)
     {       
@@ -95,60 +97,41 @@ public class Liveness extends InterferenceGraph
     
     private void computeDFA()
     {	
-        // Create in, out, inprime, outprime
+        // Inicializa in, out, inprime, outprime
         in = new Hashtable<Node, HashSet<Temp>>();
         out = new Hashtable<Node, HashSet<Temp>>();
-        Hashtable<Node, HashSet<Temp>> inprime = new Hashtable<Node, HashSet<Temp>>();
-        Hashtable<Node, HashSet<Temp>> outprime = new Hashtable<Node, HashSet<Temp>>();
-        HashSet<Temp> outTest = new HashSet<Temp>();
-        HashSet<Temp> inTest = new HashSet<Temp>();
+        inprime = new Hashtable<Node, HashSet<Temp>>();
+        outprime = new Hashtable<Node, HashSet<Temp>>();
 
-        // insert all nodes in reverse order, in a ArrayList
+        // coloca os nodes em ordem inversa nessa ArrayList
         ArrayList<Node> nodes = new ArrayList<Node>();
         for ( List<Node> aux = graph.nodes(); aux != null; aux = aux.tail )
         {
-            nodes.add(0, aux.head); //insert head in the beginning of nodes array
-            in.put(aux.head, new HashSet<Temp>()); // Initialize with [] 
+            nodes.add(0, aux.head);
+            //System.out.println(nodes.toString());
+            in.put(aux.head, new HashSet<Temp>()); // Começa 
             out.put(aux.head, new HashSet<Temp>());
         }
                 
-        boolean equal;
         do {
-            equal = true;
             for (Node n : nodes) {
-                //compare if (in[n] != inprime[n] || out[n] != outprime[n]) for all n)
-                try {
-                  //add the same set two times, to see if they are equal
-                  //(addAll returns false if they are equal)
-                  outTest.clear();
-                  outTest.addAll(outprime.get(n)); //add the old set
-                  if(outTest.addAll(out.get(n))){ //add again for testing
-                    equal = false;
-                  }
-                  //the same for in
-                  inTest.clear();
-                  inTest.addAll(inprime.get(n));
-                  if(inTest.addAll(in.get(n))){ 
-                    equal = false;
-                  }
-                }
-                catch (NullPointerException e){//in the first loop, the sets are empty
-                  equal = false;
-                }
-                
                 // out'[n] <- out[n];
-                outprime.put(n, out.get(n));
+                HashSet<Temp> outtemp = new HashSet<Temp>();
+                outtemp.addAll(out.get(n));
+                outprime.put(n, outtemp);
                 // in'[n] <- in[n]
-				HashSet<Temp> i;
-                i = inprime.put(n, in.get(n));
-				//System.out.println("I = " + i); 
+                inprime.put(n, in.get(n));
             }
 
             for (Node n : nodes) {
                 // in[n] <- use[n] U (out[n] - def[n]);
                 HashSet<Temp> t = new HashSet<Temp>();
                 t.addAll(gen.get(n));
-                t.addAll(out_minus_def(n));
+                //t.addAll(out_menos_def(n));
+                HashSet<Temp> res = new HashSet<Temp>();
+                res.addAll(out.get(n));
+                res.removeAll(kill.get(n));
+                t.addAll(res);
                 in.put(n, t);
                 
                 // out[n] <- U(s in succ[n]) (in[s]) 
@@ -161,12 +144,71 @@ public class Liveness extends InterferenceGraph
                 out.put(n, r);
             }            
  
-        } while (equal==false);
+        } while (compara_ins() == false || compara_outs() == false);
         System.out.println("Saiu");
+        //dump(System.err);
+        //graph.show(System.out);
     }
     
-    private HashSet<Temp> out_minus_def(Node n) {
-        HashSet<Temp> res = (HashSet<Temp>) out.get(n).clone();
+    private Boolean compara_ins() {
+        Hashtable<Node, HashSet<Temp>> a = in;
+        Hashtable<Node, HashSet<Temp>> b = inprime;
+        // Primeiro testa se ambas hashtables tem as mesmas chaves.
+            if (b.keySet().containsAll(a.keySet()) == false) {
+ //               System.out.println("Chaves de in e inprime estão diferentes.");
+                return false;
+            }
+            if (a.keySet().containsAll(b.keySet()) == false) {
+//                System.out.println("Chaves de in e inprime estão diferentes.");
+                return false;
+            }
+
+        // Testa se a[n] C b[n] e se b[n] C a[n].
+        // Se sim, é porque n mapeia para o mesmo conjunto
+        for (Node n : a.keySet()) {
+            if (a.get(n).containsAll(b.get(n)) == false) {
+//                System.out.println("Conjuntos de in[" + n + "] e inprime[" + n + "] diferem.");
+                return false;
+            }
+            if (b.get(n).containsAll(a.get(n)) == false) {
+                //System.out.println("Conjuntos de in[" + n + "] e inprime[" + n + "] diferem.");
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private Boolean compara_outs() {
+        Hashtable<Node, HashSet<Temp>> a = out;
+        Hashtable<Node, HashSet<Temp>> b = outprime;
+        // Primeiro testa se ambas hashtables tem as mesmas chaves.
+            if (b.keySet().containsAll(a.keySet()) == false) {
+                //System.out.println("Chaves de out e outprime estão diferentes.");
+                return false;
+            }
+            if (a.keySet().containsAll(b.keySet()) == false) {
+                //System.out.println("Chaves de out e outprime estão diferentes.");
+                return false;
+            }
+
+        // Testa se a[n] C b[n] e se b[n] C a[n].
+        // Se sim, é porque n mapeia para o mesmo conjunto
+        for (Node n : a.keySet()) {
+            if (a.get(n).containsAll(b.get(n)) == false) {
+                //System.out.println("Conjuntos de out[" + n + "] e outprime[" + n + "] diferem.");
+                return false;
+            }
+            if (b.get(n).containsAll(a.get(n)) == false) {
+                //System.out.println("Conjuntos de out[" + n + "] e outprime[" + n + "] diferem.");
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private HashSet<Temp> out_menos_def(Node n) {
+        HashSet<Temp> res = new HashSet<Temp>();
+        res.addAll(out.get(n));
         res.removeAll(kill.get(n));
         return res;
     }
