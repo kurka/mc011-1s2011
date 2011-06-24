@@ -67,8 +67,11 @@ public class Codegen {
     if (s.dst instanceof MEM) {
       munchMove((MEM) s.dst, s.src);
     }
-    else {
+    else if (s.dst instanceof TEMP) {
       munchMove((TEMP) s.dst, s.src);
+    }
+    else {
+      throw new Error("Error on Move");
     }
     System.out.println("saindo de munchMove");
   }
@@ -79,15 +82,67 @@ public class Codegen {
    */
   private void munchMove(MEM d, Exp s) {
     System.out.println("entrando em munchMoveMem");
+
+    // Calculate VALUE and save it in a new Temp
     Temp val = munchExp(s);
 
-    // NEM sempre entra no munchExp para cálculo do address.
-    // TODO: checar se a expressão é uma binop
-    Temp address = munchExp(d.exp);
+    // Case 1: MEM is addressed by an arithmetic expression involving REG and CONST
+    // On this case, do NOT create a new Temp.
+    // Instead, use the [reg + const] assembly notation
+    if (d.exp instanceof BINOP) {
+      BINOP op = (BINOP) d.exp;
+      switch (op.binop) {
+        case BINOP.PLUS:
+          // [REG + CONST]
+          if ((op.left instanceof TEMP) && (op.right instanceof CONST)) {
+            TEMP t = (TEMP) op.left;
+            CONST c = (CONST) op.right;
+            String assem = String.format("mov [`s0 + %d], `s1", c.value);
+            emit(new assem.OPER(assem,
+                                null,
+                                new List<Temp>(t.temp, new List<Temp>(val, null))));
+          }
+          // [CONST + REG]
+          else if ((op.left instanceof CONST) && (op.right instanceof TEMP)) {
+            CONST c = (CONST) op.left;
+            TEMP t = (TEMP) op.right;
+            String assem = String.format("mov [%d + `s0], `s1", c.value);
+            emit(new assem.OPER(assem,
+                                null,
+                                new List<Temp>(t.temp, new List<Temp>(val, null))));
+          }
+          break;
+        case BINOP.MINUS:
+          // [REG - CONST]
+          if ((op.left instanceof TEMP) && (op.right instanceof CONST)) {
+            TEMP t = (TEMP) op.left;
+            CONST c = (CONST) op.right;
+            String assem = String.format("mov [`s0 - %d], `s1", c.value);
+            emit(new assem.OPER(assem,
+                                null,
+                                new List<Temp>(t.temp, new List<Temp>(val, null))));
+          }
+          // [CONST - REG]
+          else if ((op.left instanceof CONST) && (op.right instanceof TEMP)) {
+            CONST c = (CONST) op.left;
+            TEMP t = (TEMP) op.right;
+            String assem = String.format("mov [%d - `s0], `s1", c.value);
+            emit(new assem.OPER(assem,
+                                null,
+                                new List<Temp>(t.temp, new List<Temp>(val, null))));
+          }
+          break;
+      }
+    }
 
-    emit(new assem.OPER("mov [`s0], `s1",
-                        null,
-                        new List<Temp>(address, new List<Temp>(val, null))));
+    // Case 2: We must calculate address expression and save it in Temp
+    else {
+      Temp address = munchExp(d.exp);
+
+      emit(new assem.OPER("mov [`s0], `s1",
+                          null,
+                          new List<Temp>(address, new List<Temp>(val, null))));
+    }
     System.out.println("saindo de munchMoveMem");
   }
 
