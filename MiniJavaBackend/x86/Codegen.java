@@ -224,7 +224,6 @@ public class Codegen {
     else {
       throw new Error("Unexpected: " + e.getClass());
     }
-    System.out.println("saindo de munchExp");
   }
 
   /**
