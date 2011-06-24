@@ -6,7 +6,8 @@ then
   exit
 fi
 
-# Create minijava.asm
+# Update minijava.asm
+rm --force minijava.asm
 java main.Main < $1
 
 # Create minijava.o
