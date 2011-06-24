@@ -20,7 +20,7 @@ public class Liveness extends InterferenceGraph
             super.addEdge(src, dst);
     }
     
-    // estruturas usadas para computar a DFA
+    // Variables used to compute DFA
     private Hashtable<Node, HashSet<Temp>> in;
     private Hashtable<Node, HashSet<Temp>> out;
     private Hashtable<Node, HashSet<Temp>> gen;
@@ -103,13 +103,13 @@ public class Liveness extends InterferenceGraph
         inprime = new Hashtable<Node, HashSet<Temp>>();
         outprime = new Hashtable<Node, HashSet<Temp>>();
 
-        // coloca os nodes em ordem inversa nessa ArrayList
+        // insert all nodes in reverse order, in an ArrayList
         ArrayList<Node> nodes = new ArrayList<Node>();
         for ( List<Node> aux = graph.nodes(); aux != null; aux = aux.tail )
         {
             nodes.add(0, aux.head);
             //System.out.println(nodes.toString());
-            in.put(aux.head, new HashSet<Temp>()); // Começa 
+            in.put(aux.head, new HashSet<Temp>());
             out.put(aux.head, new HashSet<Temp>());
         }
                 
@@ -144,50 +144,50 @@ public class Liveness extends InterferenceGraph
                 out.put(n, r);
             }            
  
-        } while (compara_ins() == false || compara_outs() == false);
+        } while (check_ins() == false || check_outs() == false);
         System.out.println("Saiu");
         //dump(System.err);
         //graph.show(System.out);
     }
     
-    private Boolean compara_ins() {
+    private Boolean check_ins() {
         Hashtable<Node, HashSet<Temp>> a = in;
         Hashtable<Node, HashSet<Temp>> b = inprime;
         // Primeiro testa se ambas hashtables tem as mesmas chaves.
-            if (b.keySet().containsAll(a.keySet()) == false) {
- //               System.out.println("Chaves de in e inprime estão diferentes.");
-                return false;
-            }
-            if (a.keySet().containsAll(b.keySet()) == false) {
-//                System.out.println("Chaves de in e inprime estão diferentes.");
-                return false;
-            }
+        if (b.keySet().containsAll(a.keySet()) == false) {
+            // System.out.println("Chaves de in e inprime estão diferentes.");
+            return false;
+        }
+        if (a.keySet().containsAll(b.keySet()) == false) {
+            // System.out.println("Chaves de in e inprime estão diferentes.");
+            return false;
+        }
 
         // Testa se a[n] C b[n] e se b[n] C a[n].
         // Se sim, é porque n mapeia para o mesmo conjunto
         for (Node n : a.keySet()) {
             if (a.get(n).containsAll(b.get(n)) == false) {
-//                System.out.println("Conjuntos de in[" + n + "] e inprime[" + n + "] diferem.");
+                // System.out.println("Conjuntos de in[" + n + "] e inprime[" + n + "] diferem.");
                 return false;
             }
             if (b.get(n).containsAll(a.get(n)) == false) {
-                //System.out.println("Conjuntos de in[" + n + "] e inprime[" + n + "] diferem.");
+                // System.out.println("Conjuntos de in[" + n + "] e inprime[" + n + "] diferem.");
                 return false;
             }
         }
         return true;
     }
     
-    private Boolean compara_outs() {
+    private Boolean check_outs() {
         Hashtable<Node, HashSet<Temp>> a = out;
         Hashtable<Node, HashSet<Temp>> b = outprime;
-        // Primeiro testa se ambas hashtables tem as mesmas chaves.
+            // Primeiro testa se ambas hashtables tem as mesmas chaves.
             if (b.keySet().containsAll(a.keySet()) == false) {
-                //System.out.println("Chaves de out e outprime estão diferentes.");
+                // System.out.println("Chaves de out e outprime estão diferentes.");
                 return false;
             }
             if (a.keySet().containsAll(b.keySet()) == false) {
-                //System.out.println("Chaves de out e outprime estão diferentes.");
+                // System.out.println("Chaves de out e outprime estão diferentes.");
                 return false;
             }
 
@@ -195,11 +195,11 @@ public class Liveness extends InterferenceGraph
         // Se sim, é porque n mapeia para o mesmo conjunto
         for (Node n : a.keySet()) {
             if (a.get(n).containsAll(b.get(n)) == false) {
-                //System.out.println("Conjuntos de out[" + n + "] e outprime[" + n + "] diferem.");
+                // System.out.println("Conjuntos de out[" + n + "] e outprime[" + n + "] diferem.");
                 return false;
             }
             if (b.get(n).containsAll(a.get(n)) == false) {
-                //System.out.println("Conjuntos de out[" + n + "] e outprime[" + n + "] diferem.");
+                // System.out.println("Conjuntos de out[" + n + "] e outprime[" + n + "] diferem.");
                 return false;
             }
         }
@@ -213,12 +213,10 @@ public class Liveness extends InterferenceGraph
         return res;
     }
     
-    private Node getNode(Temp t)
-    {
+    private Node getNode(Temp t) {
         Node n = map.get(t);
         
-        if ( n == null )
-        {
+        if (n == null) {
             n = this.newNode();
             
             map.put(t, n);
@@ -228,41 +226,34 @@ public class Liveness extends InterferenceGraph
         return n;
     }
     
-    private void handle(Node instr)
-    {
-        for( List<Temp> defs = graph.def(instr); defs != null; defs = defs.tail )
-        {
+    private void handle(Node instr) {
+        for (List<Temp> defs = graph.def(instr); defs != null; defs = defs.tail) {
             Node currentTemp = this.getNode(defs.head);
             
-            for( Temp liveOut : out.get(instr) )
-            {                
+            for ( Temp liveOut : out.get(instr) ) {                
                 Node currentLiveOut = this.getNode(liveOut);
                 this.addEdge(currentTemp, currentLiveOut);
             }
         }
     }
     
-    private void handleMove(Node instr)
-    {
+    private void handleMove(Node instr) {
         Node dst = this.getNode(graph.def(instr).head);
         Node src = this.getNode(graph.use(instr).head);
         
         moveList = new MoveList(src, dst, moveList);
         
-        for( Temp t : out.get(instr) )
-        {
+        for (Temp t : out.get(instr)) {
             Node currentOut = this.getNode(t);
             
-            if ( currentOut != src )
-            {
+            if (currentOut != src) {
                 //this.addEdge(currentOut, dst);
                 this.addEdge(dst, currentOut);
             }
         }
     }
     
-    private void buildInterference()
-    {
+    private void buildInterference() {
         // Estamos sentados sobre ombros de um gigante...
         // Aqui, nos temos uma lista sobre todos os temporarios
         // vivos no fim de cada no. Desta forma, eh relativamente
