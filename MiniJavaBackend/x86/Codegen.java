@@ -176,7 +176,7 @@ public class Codegen {
     Temp right = munchExp(s.right);
 
     // Emit cmp instruction, to set the Machine Status Word.
-    emit(new assem.OPER("cmp `s0 `s1",
+    emit(new assem.OPER("cmp `s0, `s1",
                         null,
                         new List<Temp>(left, new List<Temp>(right, null))));
 
@@ -265,7 +265,7 @@ public class Codegen {
       return munchConst((CONST) e);
     }
     else if (e instanceof ESEQ) {
-      return munchEseq((ESEQ) e);
+      return munchESeq((ESEQ) e);
     }
     else if (e instanceof MEM) {
       return munchMem((MEM) e);
@@ -288,7 +288,7 @@ public class Codegen {
     System.out.println("entrando em munchConst");
     Temp ret = new Temp();
     emit(new assem.OPER("mov `d0, " + e.value,
-                    new List<Temp>(ret,null),
+                    new List<Temp>(ret, null),
                     null));
     System.out.println("saindo de munchConst");
     return ret;
@@ -299,61 +299,143 @@ public class Codegen {
    */
   private Temp munchBinop(BINOP e) {
     System.out.println("entrando em munchBinop");
-    String instrstr;
 
-    //get instruction name
-    if (e.binop == BINOP.PLUS){
-		instrstr = "add";
-    }
-    else if (e.binop == BINOP.MINUS){
-        instrstr = "sub";
-    }
-    else if (e.binop == BINOP.TIMES){
-        instrstr = "imul";
-    }
-    else if (e.binop == BINOP.DIV){
-        instrstr = "idiv";
-    }
-    else if (e.binop == BINOP.AND){
-        instrstr = "and";
-    }
-    else if (e.binop == BINOP.OR){
-        instrstr = "or";
-    }
-    else if (e.binop == BINOP.LSHIFT){
-        instrstr = "shl";
-    }
-    else if (e.binop == BINOP.RSHIFT){
-        instrstr = "shr";
-    }
-    else if (e.binop == BINOP.ARSHIFT){
-        instrstr = "sar"; //??
-    }
-    else if (e.binop == BINOP.XOR){
-        instrstr = "xor";
-    }
-    else {
-      throw new Error("Unexpected: " + e.getClass() + " in munchBinop");
-    }
-
-
-    //FIXME: dumb way. don't need to call munchExp and get a new temporary everytime.
     Temp left = munchExp(e.left);
-    Temp right = munchExp(e.right);
 
-    String asm = String.format(instrstr + " `d0, `s1");
+    // We don't know whether Temp or CONST will be used
+    Temp right;
+    CONST c;
 
-    emit(new assem.OPER(asm,
-                        new List<Temp>(left, null),
-                        new List<Temp>(left, new List<Temp>(right, null))));
-    System.out.println("saindo de munchBinop");
+    // Also, define an aux String to build assembly code
+    String assem;
+
+    switch (e.binop) {
+
+      /**
+       * PLUS
+       */
+      case BINOP.PLUS:
+        System.out.println("BinOp(PLUS)");
+        // ADD REG, IMMED
+        if (e.right instanceof CONST) {
+          c = (CONST) e.right;
+          assem = String.format("add `d0, %d", c.value);
+          emit(new assem.OPER(assem,
+                              new List<Temp>(left, null),
+                              null));
+        }
+        // ADD REG, REG
+        else {
+          right = munchExp(e.right);
+          emit(new assem.OPER("add `d0 `s1",
+                              new List<Temp>(left, null),
+                              new List<Temp>(left, new List<Temp>(right, null))));
+        }
+        break;
+
+      /**
+       * MINUS
+       */
+      case BINOP.MINUS:
+        System.out.println("BinOp(MINUS)");
+        // SUB REG, IMMED
+        if (e.right instanceof CONST) {
+          c = (CONST) e.right;
+          assem = String.format("sub `d0, %d", c.value);
+          emit(new assem.OPER(assem,
+                              new List<Temp>(left, null),
+                              null));
+        }
+        // SUB REG, REG
+        else {
+          right = munchExp(e.right);
+          emit(new assem.OPER("sub `d0 `s1",
+                              new List<Temp>(left, null),
+                              new List<Temp>(left, new List<Temp>(right, null))));
+        }
+        break;
+
+      /**
+       * TIMES
+       */
+      case BINOP.TIMES:
+        System.out.println("BinOp(TIMES)");
+        right = munchExp(e.right);
+        emit(new assem.OPER("imul `d0 `s1",
+                            new List<Temp>(left, null),
+                            new List<Temp>(left, new List<Temp>(right, null))));
+        break;
+
+      /**
+       * AND
+       */
+      case BINOP.AND:
+        System.out.println("BinOp(AND)");
+        right = munchExp(e.right);
+        emit(new assem.OPER("and `d0 `s1",
+                            new List<Temp>(left, null),
+                            new List<Temp>(left, new List<Temp>(right, null))));
+        break;
+
+      /**
+       * OR
+       */
+      case BINOP.OR:
+        System.out.println("BinOp(OR)");
+        right = munchExp(e.right);
+        emit(new assem.OPER("or `d0 `s1",
+                            new List<Temp>(left, null),
+                            new List<Temp>(left, new List<Temp>(right, null))));
+        break;
+
+      /**
+       * LSHIFT
+       */
+      case BINOP.LSHIFT:
+        System.out.println("BinOp(LSHIFT)");
+        c = (CONST) e.right;
+        assem = String.format("shl `d0 %d", c.value);
+        emit(new assem.OPER(assem,
+                            new List<Temp>(left, null),
+                            null));
+        break;
+
+      /**
+       * RSHIFT
+       */
+      case BINOP.RSHIFT:
+        System.out.println("BinOp(RSHIFT)");
+        c = (CONST) e.right;
+        assem = String.format("shr `d0 %d", c.value);
+        emit(new assem.OPER(assem,
+                            new List<Temp>(left, null),
+                            null));
+        break;
+
+      /**
+       * XOR
+       */
+      case BINOP.XOR:
+        System.out.println("BinOp(XOR)");
+        right = munchExp(e.right);
+        emit(new assem.OPER("xor `d0 `s1",
+                            new List<Temp>(left, null),
+                            new List<Temp>(left, new List<Temp>(right, null))));
+        break;
+
+      default:
+        throw new Error("Unhandled BinOp: " + e.binop);
+
+    } // End of swith
+
+    // Always return left Temp
     return left;
   }
 
   /**
    * EXP ESEQ
    */
-  private Temp munchEseq(ESEQ e) {
+  private Temp munchESeq(ESEQ e) {
     System.out.println("entrando em munchEseq");
     munchStm(e.stm);
     System.out.println("saindo de munchEseq");
@@ -436,8 +518,6 @@ public class Codegen {
     System.out.println("saindo de munchTemp");
     return e.temp;
   }
-
-
 
   /*-------------------------------------------------------------*
    *                              MAIN                           *
