@@ -447,37 +447,56 @@ public class Codegen {
    */
   private Temp munchCall(CALL e) {
     System.out.println("entrando em munchCall");
-    //find the amount of params that will go to stack
+
+    // Find the amount of params that will go to stack
     ArrayList<Exp> reversedParams = new ArrayList<tree.Exp>();
     int numArgs = 0;
 
-    for( List<Exp> aux = e.args; aux != null; aux = aux.tail ){
+    for (List<Exp> aux = e.args; aux != null; aux = aux.tail) {
       numArgs += 1;
       reversedParams.add(0, aux.head);
     }
 
-    //put the params in stack, in reverse order
-    for(Exp param : reversedParams){
+    // Put the params in stack, in reverse order.
+    // Also, build the list of Temp params
+    List<Temp> paramsTemp = null;
+    for (Exp param : reversedParams) {
       Temp p = munchExp(param);
+      paramsTemp = new List<Temp>(p, paramsTemp);
       emit(new assem.OPER("push `s0",
-                        null,
-                        new List<Temp>(p, null)));
+                          new List<Temp>(Frame.esp, null),
+                          new List<Temp>(p, new List<Temp>(Frame.esp, null))));
     }
 
-    //do the call expression
-    Temp funcAdd = munchExp(e.func);//FIXME: dumb way
-    emit(new assem.OPER("call `s0",
-                        null,
-                        new List<Temp>(funcAdd, frame.calldefs)));
+    String assem; // aux
 
+    // Perform direct call whether func is already a NAME
+    if (e.func instanceof NAME) {
+      NAME n = (NAME) e.func;
+      assem = String.format("call %s", n.label.toString());
+      emit(new assem.OPER(assem, 
+                          new List<Temp>(Frame.esp, Frame.calldefs),
+                          new List<Temp>(Frame.esp, paramsTemp)));
+    }
+    // Otherwise, it's necessary to process the call address
+    else {
+      Temp callAddress = munchExp(e.func);
+      emit(new assem.OPER("call `s0",
+                          new List<Temp>(Frame.esp, Frame.calldefs),
+                          new List<Temp>(callAddress, new List<Temp>(Frame.esp, paramsTemp))));
+    }
 
-    //restore the stack
-    emit(new assem.OPER("add esp, " + (numArgs*4),
-                        new List<Temp>(frame.esp, null),
-                        new List<Temp>(frame.esp, null)));
-    //get the return value
+    // Restore the stack
+    if (numArgs != 0) {
+      assem = String.format("add esp, %d", (4 * numArgs));
+      emit(new assem.OPER(assem,
+                          new List<Temp>(Frame.esp, null),
+                          new List<Temp>(Frame.esp, null)));
+    }
+
+    // Get the return value
     Temp ret = new Temp();
-    emit(new assem.MOVE("mov `d0, eax", ret, frame.eax));
+    emit(new assem.MOVE("mov `d0, eax", ret, Frame.eax));
     System.out.println("saindo de munchCall");
     return ret;
   }
