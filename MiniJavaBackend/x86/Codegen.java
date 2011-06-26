@@ -101,7 +101,9 @@ public class Codegen {
             emit(new assem.OPER(assem,
                                 null,
                                 new List<Temp>(t.temp, new List<Temp>(val, null))));
+            return;
           }
+
           // [CONST + REG]
           else if ((op.left instanceof CONST) && (op.right instanceof TEMP)) {
             CONST c = (CONST) op.left;
@@ -110,6 +112,7 @@ public class Codegen {
             emit(new assem.OPER(assem,
                                 null,
                                 new List<Temp>(t.temp, new List<Temp>(val, null))));
+            return;
           }
           break;
         case BINOP.MINUS:
@@ -121,6 +124,7 @@ public class Codegen {
             emit(new assem.OPER(assem,
                                 null,
                                 new List<Temp>(t.temp, new List<Temp>(val, null))));
+            return;
           }
           // [CONST - REG]
           else if ((op.left instanceof CONST) && (op.right instanceof TEMP)) {
@@ -130,19 +134,18 @@ public class Codegen {
             emit(new assem.OPER(assem,
                                 null,
                                 new List<Temp>(t.temp, new List<Temp>(val, null))));
+            return;
           }
           break;
       }
     }
 
     // Case 2: We must calculate address expression and save it in Temp
-    else {
-      Temp address = munchExp(d.exp);
+    Temp address = munchExp(d.exp);
 
-      emit(new assem.OPER("mov [`s0], `s1",
-                          null,
-                          new List<Temp>(address, new List<Temp>(val, null))));
-    }
+    emit(new assem.OPER("mov [`s0], `s1",
+                        null,
+                        new List<Temp>(address, new List<Temp>(val, null))));
     System.out.println("saindo de munchMoveMem");
   }
 
