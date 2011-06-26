@@ -521,7 +521,7 @@ public class Codegen {
           if ((op.left instanceof TEMP) && (op.right instanceof CONST)) {
             TEMP t = (TEMP) op.left;
             CONST c = (CONST) op.right;
-            assem = String.format("mov `d0 [`s0 + %d]", c.value);
+            assem = String.format("mov `d0, [`s0 + %d]", c.value);
             emit(new assem.OPER(assem,
                                 new List<Temp>(ret, null),
                                 new List<Temp>(t.temp, null)));
@@ -530,7 +530,7 @@ public class Codegen {
           else if ((op.left instanceof CONST) && (op.right instanceof TEMP)) {
             CONST c = (CONST) op.left;
             TEMP t = (TEMP) op.right;
-            assem = String.format("mov `d0 [%d + `s0]", c.value);
+            assem = String.format("mov `d0, [%d + `s0]", c.value);
             emit(new assem.OPER(assem,
                                 new List<Temp>(ret, null),
                                 new List<Temp>(t.temp, null)));
@@ -542,7 +542,7 @@ public class Codegen {
           if ((op.left instanceof TEMP) && (op.right instanceof CONST)) {
             TEMP t = (TEMP) op.left;
             CONST c = (CONST) op.right;
-            assem = String.format("mov `d0 [`s0 - %d]", c.value);
+            assem = String.format("mov `d0, [`s0 - %d]", c.value);
             emit(new assem.OPER(assem,
                                 new List<Temp>(ret, null),
                                 new List<Temp>(t.temp, null)));
@@ -551,7 +551,7 @@ public class Codegen {
           else if ((op.left instanceof CONST) && (op.right instanceof TEMP)) {
             CONST c = (CONST) op.left;
             TEMP t = (TEMP) op.right;
-            assem = String.format("mov `d0 [%d - `s0]", c.value);
+            assem = String.format("mov `d0, [%d - `s0]", c.value);
             emit(new assem.OPER(assem,
                                 new List<Temp>(ret, null),
                                 new List<Temp>(t.temp, null)));
@@ -578,7 +578,8 @@ public class Codegen {
   private Temp munchName(NAME e) {
     System.out.println("entrando em munchName");
     Temp ret = new Temp();
-    emit(new assem.OPER("mov `d0, " + e.label.toString(),
+    String assem = String.format("mov `d0, %s", e.label.toString());
+    emit(new assem.OPER(assem,
                         new List<Temp>(ret, null),
                         null));
     System.out.println("saindo de munchName");

@@ -21,4 +21,4 @@ clean:
 	rm --force util/conversor/*.class
 	rm --force visitor/*.class
 	rm --force x86/*.class
-	rm --force runtime.o minijava.o mc011.o
+	rm --force runtime.o minijava.o mc011
