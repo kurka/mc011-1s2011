@@ -505,72 +505,47 @@ public class Codegen {
    * EXP MEM
    */
   private Temp munchMem(MEM e) {
-    System.out.println("entrando em munchMem");
     Temp ret = new Temp();
 
-    String assem; // aux
-
-    // Deal with MOV `d0 [ REG +- CONST ]
+    // Deal with MOV `d0, [ REG +- CONST ]
     if (e.exp instanceof BINOP) {
       BINOP op = (BINOP) e.exp;
 
-      switch (op.binop) {
+      // [ REG + CONST ]
+      if (op.binop == BINOP.PLUS) {
+        if (op.left instanceof TEMP && op.right instanceof CONST) {
+          TEMP t = (TEMP) op.left;
+          CONST c = (CONST) op.right;
+          String assem = String.format("mov `d0, [`s0 + %d]", c.value);
+          emit(new assem.OPER(assem,
+                              new List<Temp>(ret, null),
+                              new List<Temp>(t.temp, null)));
+          return ret;
+        }
+      }
 
-        case BINOP.PLUS:
-          // [REG + CONST]
-          if ((op.left instanceof TEMP) && (op.right instanceof CONST)) {
-            TEMP t = (TEMP) op.left;
-            CONST c = (CONST) op.right;
-            assem = String.format("mov `d0, [`s0 + %d]", c.value);
-            emit(new assem.OPER(assem,
-                                new List<Temp>(ret, null),
-                                new List<Temp>(t.temp, null)));
-          }
-          // [CONST + REG]
-          else if ((op.left instanceof CONST) && (op.right instanceof TEMP)) {
-            CONST c = (CONST) op.left;
-            TEMP t = (TEMP) op.right;
-            assem = String.format("mov `d0, [%d + `s0]", c.value);
-            emit(new assem.OPER(assem,
-                                new List<Temp>(ret, null),
-                                new List<Temp>(t.temp, null)));
-          }
-          break;
-
-        case BINOP.MINUS:
-          // [REG - CONST]
-          if ((op.left instanceof TEMP) && (op.right instanceof CONST)) {
-            TEMP t = (TEMP) op.left;
-            CONST c = (CONST) op.right;
-            assem = String.format("mov `d0, [`s0 - %d]", c.value);
-            emit(new assem.OPER(assem,
-                                new List<Temp>(ret, null),
-                                new List<Temp>(t.temp, null)));
-          }
-          // [CONST - REG]
-          else if ((op.left instanceof CONST) && (op.right instanceof TEMP)) {
-            CONST c = (CONST) op.left;
-            TEMP t = (TEMP) op.right;
-            assem = String.format("mov `d0, [%d - `s0]", c.value);
-            emit(new assem.OPER(assem,
-                                new List<Temp>(ret, null),
-                                new List<Temp>(t.temp, null)));
-          }
-          break;
+      // [ REG - CONST ]
+      else if (op.binop == BINOP.MINUS) {
+        if (op.left instanceof TEMP && op.right instanceof CONST) {
+          TEMP t = (TEMP) op.left;
+          CONST c = (CONST) op.right;
+          String assem = String.format("mov `d0, [`s0 - %d]", c.value);
+          emit(new assem.OPER(assem,
+                              new List<Temp>(ret, null),
+                              new List<Temp>(t.temp, null)));
+          return ret;
+        }
       }
     }
 
     // Deal with common case
-    else {
-      Temp exp = munchExp(e.exp);
-      emit(new assem.OPER("mov `d0, [`s0]",
-                          new List<Temp>(ret, null),
-                          new List<Temp>(exp, null)));
-    }
-
-    System.out.println("saindo de munchMem");
+    Temp src = munchExp(e.exp);
+    emit(new assem.OPER("mov `d0, [`s0]", 
+                        new List<Temp>(ret, null),
+                        new List<Temp>(src, null)));
     return ret;
   }
+
 
   /**
    * EXP NAME
