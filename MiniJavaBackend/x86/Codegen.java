@@ -327,7 +327,7 @@ public class Codegen {
         // ADD REG, REG
         else {
           right = munchExp(e.right);
-          emit(new assem.OPER("add `d0 `s1",
+          emit(new assem.OPER("add `d0, `s1",
                               new List<Temp>(left, null),
                               new List<Temp>(left, new List<Temp>(right, null))));
         }
@@ -349,7 +349,7 @@ public class Codegen {
         // SUB REG, REG
         else {
           right = munchExp(e.right);
-          emit(new assem.OPER("sub `d0 `s1",
+          emit(new assem.OPER("sub `d0, `s1",
                               new List<Temp>(left, null),
                               new List<Temp>(left, new List<Temp>(right, null))));
         }
@@ -361,7 +361,7 @@ public class Codegen {
       case BINOP.TIMES:
         System.out.println("BinOp(TIMES)");
         right = munchExp(e.right);
-        emit(new assem.OPER("imul `d0 `s1",
+        emit(new assem.OPER("imul `d0, `s1",
                             new List<Temp>(left, null),
                             new List<Temp>(left, new List<Temp>(right, null))));
         break;
@@ -372,7 +372,7 @@ public class Codegen {
       case BINOP.AND:
         System.out.println("BinOp(AND)");
         right = munchExp(e.right);
-        emit(new assem.OPER("and `d0 `s1",
+        emit(new assem.OPER("and `d0, `s1",
                             new List<Temp>(left, null),
                             new List<Temp>(left, new List<Temp>(right, null))));
         break;
@@ -383,7 +383,7 @@ public class Codegen {
       case BINOP.OR:
         System.out.println("BinOp(OR)");
         right = munchExp(e.right);
-        emit(new assem.OPER("or `d0 `s1",
+        emit(new assem.OPER("or `d0, `s1",
                             new List<Temp>(left, null),
                             new List<Temp>(left, new List<Temp>(right, null))));
         break;
@@ -394,7 +394,7 @@ public class Codegen {
       case BINOP.LSHIFT:
         System.out.println("BinOp(LSHIFT)");
         c = (CONST) e.right;
-        assem = String.format("shl `d0 %d", c.value);
+        assem = String.format("shl `d0, %d", c.value);
         emit(new assem.OPER(assem,
                             new List<Temp>(left, null),
                             null));
@@ -406,7 +406,7 @@ public class Codegen {
       case BINOP.RSHIFT:
         System.out.println("BinOp(RSHIFT)");
         c = (CONST) e.right;
-        assem = String.format("shr `d0 %d", c.value);
+        assem = String.format("shr `d0, %d", c.value);
         emit(new assem.OPER(assem,
                             new List<Temp>(left, null),
                             null));
@@ -418,7 +418,7 @@ public class Codegen {
       case BINOP.XOR:
         System.out.println("BinOp(XOR)");
         right = munchExp(e.right);
-        emit(new assem.OPER("xor `d0 `s1",
+        emit(new assem.OPER("xor `d0, `s1",
                             new List<Temp>(left, null),
                             new List<Temp>(left, new List<Temp>(right, null))));
         break;
