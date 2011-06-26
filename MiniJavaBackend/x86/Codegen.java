@@ -458,14 +458,16 @@ public class Codegen {
     }
 
     // Put the params in stack, in reverse order.
-    // Also, build the list of Temp params
-    List<Temp> paramsTemp = null;
+    // // Also, build the list of Temp params
+    //List<Temp> paramsTemp = null;
     for (Exp param : reversedParams) {
       Temp p = munchExp(param);
-      paramsTemp = new List<Temp>(p, paramsTemp);
+      //paramsTemp = new List<Temp>(p, paramsTemp);
       emit(new assem.OPER("push `s0",
-                          new List<Temp>(Frame.esp, null),
-                          new List<Temp>(p, new List<Temp>(Frame.esp, null))));
+                          //new List<Temp>(Frame.esp, null),
+                          //new List<Temp>(p, new List<Temp>(Frame.esp, null))));
+                          null,
+                          new List<Temp>(p, null)));
     }
 
     String assem; // aux
@@ -474,24 +476,30 @@ public class Codegen {
     if (e.func instanceof NAME) {
       NAME n = (NAME) e.func;
       assem = String.format("call %s", n.label.toString());
-      emit(new assem.OPER(assem, 
-                          new List<Temp>(Frame.esp, Frame.calldefs),
-                          new List<Temp>(Frame.esp, paramsTemp)));
+      emit(new assem.OPER(assem,
+                          // new List<Temp>(Frame.esp, Frame.calldefs),
+                          // new List<Temp>(Frame.esp, paramsTemp)));
+                          Frame.calldefs,
+                          null));
     }
     // Otherwise, it's necessary to process the call address
     else {
       Temp callAddress = munchExp(e.func);
       emit(new assem.OPER("call `s0",
-                          new List<Temp>(Frame.esp, Frame.calldefs),
-                          new List<Temp>(callAddress, new List<Temp>(Frame.esp, paramsTemp))));
+                          Frame.calldefs,
+                          new List<Temp>(callAddress, null)));
+                          // new List<Temp>(Frame.esp, Frame.calldefs),
+                          // new List<Temp>(callAddress, new List<Temp>(Frame.esp, paramsTemp))));
     }
 
     // Restore the stack
     if (numArgs != 0) {
       assem = String.format("add esp, %d", (4 * numArgs));
       emit(new assem.OPER(assem,
-                          new List<Temp>(Frame.esp, null),
-                          new List<Temp>(Frame.esp, null)));
+                          null,
+                          null));
+                          // new List<Temp>(Frame.esp, null),
+                          // new List<Temp>(Frame.esp, null)));
     }
 
     // Get the return value
