@@ -312,16 +312,18 @@ public class Codegen {
   private Temp munchBinop(BINOP e) {
     System.out.println("entrando em munchBinop");
 
-    Temp left = munchExp(e.left);
-
-    // We don't know yet whether Temp or CONST will be used
+    HashMap<Integer,String> dict; //aux
+    String assem; //aux String to build assembly code
     Temp right;
     CONST c;
+    
+    
+    Temp tmp = munchExp(e.left);
+    Temp left = new Temp();
 
-    // Also, define an aux String to build assembly code
-    String assem;
+    //make the binop operation in two stages (see two address instructions in book's p 151)
+    emit(new assem.MOVE("`d0, `s0", left, tmp));
 
-    HashMap<Integer,String> dict; //aux
 
     switch (e.binop) {
 
@@ -347,7 +349,6 @@ public class Codegen {
                               new List<Temp>(left, new List<Temp>(right, null))));
           return left;
         }
-        //break;
 
       /**
        * LSHIFT and RSHIFT
@@ -463,7 +464,7 @@ public class Codegen {
 
     // Restore the stack
     if (numArgs != 0) {
-      assem = String.format("add esp, %d", (4 * numArgs));
+      assem = String.format("add esp, %d", (frame.wordsize() * numArgs));
       emit(new assem.OPER(assem,
                           new List<Temp>(Frame.esp, null),
                           new List<Temp>(Frame.esp, null)));
