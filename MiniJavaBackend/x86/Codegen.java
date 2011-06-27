@@ -97,7 +97,7 @@ public class Codegen {
       if ((op.binop == BINOP.PLUS) && (op.left instanceof TEMP) && (op.right instanceof CONST)) {
         TEMP t = (TEMP) op.left;
         CONST c = (CONST) op.right;
-        assem = String.format("mov [`s0 + %d], `s1", c.value);
+        assem = String.format("mov [`s0+%d], `s1", c.value);
         emit(new assem.OPER(assem,
               null,
               new List<Temp>(t.temp, new List<Temp>(val, null))));
@@ -108,7 +108,7 @@ public class Codegen {
         if((op.left instanceof TEMP) && (op.right instanceof CONST)) {
           TEMP t = (TEMP) op.left;
           CONST c = (CONST) op.right;
-          assem = String.format("mov [`s0 + %d], `s1", c.value);
+          assem = String.format("mov [`s0+%d], `s1", c.value);
           emit(new assem.OPER(assem,
                 null,
                 new List<Temp>(t.temp, new List<Temp>(val, null))));
@@ -122,14 +122,14 @@ public class Codegen {
             CONST c = (CONST) op_shl.right;
             if (op_shl.left instanceof CONST) {
               CONST op_shl_left = (CONST) op_shl.left;
-              assem = String.format("mov [`s0 + %d ], `s1", (int)Math.pow(2,c.value)*op_shl_left.value);
+              assem = String.format("mov [`s0+%d], `s1", (int)Math.pow(2,c.value)*op_shl_left.value);
                   emit(new assem.OPER(assem,
                       null,
                       new List<Temp>(t, new List<Temp>(val, null))));
                   }
             else {
               Temp index = munchExp(op_shl.left);
-              assem = String.format("mov [`s0 + %d * `s1 ], `s2", (int)Math.pow(2,c.value));
+              assem = String.format("mov [`s0+%d*`s1], `s2", (int)Math.pow(2,c.value));
               emit(new assem.OPER(assem,
                     null,
                     new List<Temp>(t, new List<Temp>(index, new List<Temp>(val, null)))));
@@ -141,7 +141,7 @@ public class Codegen {
       else if ((op.binop == BINOP.MINUS) && (op.left instanceof TEMP) && (op.right instanceof CONST)) {
         TEMP t = (TEMP) op.left;
         CONST c = (CONST) op.right;
-        assem = String.format("mov [`s0 - %d], `s1", c.value);
+        assem = String.format("mov [`s0-%d], `s1", c.value);
         emit(new assem.OPER(assem,
               null,
               new List<Temp>(t.temp, new List<Temp>(val, null))));
@@ -492,7 +492,7 @@ public class Codegen {
         if((op.left instanceof TEMP) && (op.right instanceof CONST)) {
           TEMP t = (TEMP) op.left;
           CONST c = (CONST) op.right;
-          String assem = String.format("mov `d0, [`s0 + %d]", c.value);
+          String assem = String.format("mov `d0, [`s0+%d]", c.value);
           emit(new assem.OPER(assem,
                 new List<Temp>(ret, null),
                 new List<Temp>(t.temp, null)));
@@ -506,14 +506,14 @@ public class Codegen {
             CONST c = (CONST) op_shl.right;
             if (op_shl.left instanceof CONST) {
               CONST op_shl_left = (CONST) op_shl.left;
-              String assem = String.format("mov `d0, [`s0 + %d]", (int)Math.pow(2, c.value)*op_shl_left.value);
+              String assem = String.format("mov `d0, [`s0+%d]", (int)Math.pow(2, c.value)*op_shl_left.value);
               emit(new assem.OPER(assem,
                     new List<Temp>(ret, null),
                     new List<Temp>(t, null)));
             }
             else {
               Temp index = munchExp(op_shl.left);
-              String assem = String.format("mov `d0, [`s0 + %d * `s1]", (int)Math.pow(2, c.value));
+              String assem = String.format("mov `d0, [`s0+%d*`s1]", (int)Math.pow(2, c.value));
               emit(new assem.OPER(assem,  
                     new List<Temp>(ret, null),
                     new List<Temp>(t, new List<Temp>(index, null))));
@@ -527,7 +527,7 @@ public class Codegen {
       else if ((op.binop == BINOP.MINUS) && (op.left instanceof TEMP) && (op.right instanceof CONST)) {
         TEMP t = (TEMP) op.left;
         CONST c = (CONST) op.right;
-        String assem = String.format("mov `d0, [`s0 - %d]", c.value);
+        String assem = String.format("mov `d0, [`s0-%d]", c.value);
         emit(new assem.OPER(assem,
               new List<Temp>(ret, null),
               new List<Temp>(t.temp, null)));
