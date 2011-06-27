@@ -91,52 +91,28 @@ public class Codegen {
     // Instead, use the [reg + const] assembly notation
     if (d.exp instanceof BINOP) {
       BINOP op = (BINOP) d.exp;
-      switch (op.binop) {
-        case BINOP.PLUS:
-          // [REG + CONST]
-          if ((op.left instanceof TEMP) && (op.right instanceof CONST)) {
-            TEMP t = (TEMP) op.left;
-            CONST c = (CONST) op.right;
-            String assem = String.format("mov [`s0 + %d], `s1", c.value);
-            emit(new assem.OPER(assem,
-                                null,
-                                new List<Temp>(t.temp, new List<Temp>(val, null))));
-            return;
-          }
+      TEMP t;
+      CONST c;
+      String assem;
 
-          // [CONST + REG]
-          else if ((op.left instanceof CONST) && (op.right instanceof TEMP)) {
-            CONST c = (CONST) op.left;
-            TEMP t = (TEMP) op.right;
-            String assem = String.format("mov [%d + `s0], `s1", c.value);
-            emit(new assem.OPER(assem,
-                                null,
-                                new List<Temp>(t.temp, new List<Temp>(val, null))));
-            return;
-          }
-          break;
-        case BINOP.MINUS:
-          // [REG - CONST]
-          if ((op.left instanceof TEMP) && (op.right instanceof CONST)) {
-            TEMP t = (TEMP) op.left;
-            CONST c = (CONST) op.right;
-            String assem = String.format("mov [`s0 - %d], `s1", c.value);
-            emit(new assem.OPER(assem,
-                                null,
-                                new List<Temp>(t.temp, new List<Temp>(val, null))));
-            return;
-          }
-          // [CONST - REG]
-          else if ((op.left instanceof CONST) && (op.right instanceof TEMP)) {
-            CONST c = (CONST) op.left;
-            TEMP t = (TEMP) op.right;
-            String assem = String.format("mov [%d - `s0], `s1", c.value);
-            emit(new assem.OPER(assem,
-                                null,
-                                new List<Temp>(t.temp, new List<Temp>(val, null))));
-            return;
-          }
-          break;
+      // [REG + CONST]
+      if ((op.binop == BINOP.PLUS) && (op.left instanceof TEMP) && (op.right instanceof CONST)) {
+        t = (TEMP) op.left;
+        c = (CONST) op.right;
+        assem = String.format("mov [`s0 + %d], `s1", c.value);
+        emit(new assem.OPER(assem,
+                            null,
+                            new List<Temp>(t.temp, new List<Temp>(val, null))));
+        return;
+      }
+      else if ((op.binop == BINOP.MINUS) && (op.left instanceof TEMP) && (op.right instanceof CONST)) {
+        t = (TEMP) op.left;
+        c = (CONST) op.right;
+        assem = String.format("mov [`s0 - %d], `s1", c.value);
+        emit(new assem.OPER(assem,
+                            null,
+                            new List<Temp>(t.temp, new List<Temp>(val, null))));
+        return;
       }
     }
 
@@ -305,12 +281,14 @@ public class Codegen {
 
     Temp left = munchExp(e.left);
 
-    // We don't know whether Temp or CONST will be used
+    // We don't know yet whether Temp or CONST will be used
     Temp right;
     CONST c;
 
     // Also, define an aux String to build assembly code
     String assem;
+
+    HashMap<Integer,String> dict; //aux
 
     switch (e.binop) {
 
@@ -325,7 +303,8 @@ public class Codegen {
           assem = String.format("add `d0, %d", c.value);
           emit(new assem.OPER(assem,
                               new List<Temp>(left, null),
-                              null));
+                              new List<Temp>(left, null)));
+          return left;
         }
         // ADD REG, REG
         else {
@@ -333,98 +312,58 @@ public class Codegen {
           emit(new assem.OPER("add `d0, `s1",
                               new List<Temp>(left, null),
                               new List<Temp>(left, new List<Temp>(right, null))));
+          return left;
         }
-        break;
+        //break;
 
       /**
-       * MINUS
-       */
-      case BINOP.MINUS:
-        System.out.println("BinOp(MINUS)");
-        // SUB REG, IMMED
-        if (e.right instanceof CONST) {
-          c = (CONST) e.right;
-          assem = String.format("sub `d0, %d", c.value);
-          emit(new assem.OPER(assem,
-                              new List<Temp>(left, null),
-                              null));
-        }
-        // SUB REG, REG
-        else {
-          right = munchExp(e.right);
-          emit(new assem.OPER("sub `d0, `s1",
-                              new List<Temp>(left, null),
-                              new List<Temp>(left, new List<Temp>(right, null))));
-        }
-        break;
-
-      /**
-       * TIMES
-       */
-      case BINOP.TIMES:
-        System.out.println("BinOp(TIMES)");
-        right = munchExp(e.right);
-        emit(new assem.OPER("imul `d0, `s1",
-                            new List<Temp>(left, null),
-                            new List<Temp>(left, new List<Temp>(right, null))));
-        break;
-
-      /**
-       * AND
-       */
-      case BINOP.AND:
-        System.out.println("BinOp(AND)");
-        right = munchExp(e.right);
-        emit(new assem.OPER("and `d0, `s1",
-                            new List<Temp>(left, null),
-                            new List<Temp>(left, new List<Temp>(right, null))));
-        break;
-
-      /**
-       * OR
-       */
-      case BINOP.OR:
-        System.out.println("BinOp(OR)");
-        right = munchExp(e.right);
-        emit(new assem.OPER("or `d0, `s1",
-                            new List<Temp>(left, null),
-                            new List<Temp>(left, new List<Temp>(right, null))));
-        break;
-
-      /**
-       * LSHIFT
+       * LSHIFT and RSHIFT
        */
       case BINOP.LSHIFT:
-        System.out.println("BinOp(LSHIFT)");
-        c = (CONST) e.right;
-        assem = String.format("shl `d0, %d", c.value);
-        emit(new assem.OPER(assem,
-                            new List<Temp>(left, null),
-                            null));
-        break;
-
-      /**
-       * RSHIFT
-       */
       case BINOP.RSHIFT:
-        System.out.println("BinOp(RSHIFT)");
+
         c = (CONST) e.right;
-        assem = String.format("shr `d0, %d", c.value);
+
+        // Build a dictionary to relate BINOP type and x86 instruction.
+        dict = new HashMap<Integer, String>();
+        dict.put(BINOP.LSHIFT, "shl");
+        dict.put(BINOP.RSHIFT, "shr");
+
+        // Now, find which instruction we need and emit it
+        assem = dict.get(e.binop) + " `d0, " + c.value;
         emit(new assem.OPER(assem,
                             new List<Temp>(left, null),
-                            null));
-        break;
+                            new List<Temp>(left, null)));
+        return left;
+        //break;
 
       /**
-       * XOR
+       * OTHERS
        */
+      case BINOP.MINUS:
+      case BINOP.TIMES:
+      case BINOP.AND:
+      case BINOP.OR:
       case BINOP.XOR:
-        System.out.println("BinOp(XOR)");
+
+        // Calculate right value
         right = munchExp(e.right);
-        emit(new assem.OPER("xor `d0, `s1",
+
+        // Build a dictionary to relate BINOP type and x86 instruction.
+        dict = new HashMap<Integer, String>();
+        dict.put(BINOP.MINUS, "sub");
+        dict.put(BINOP.TIMES, "imul");
+        dict.put(BINOP.AND, "and");
+        dict.put(BINOP.OR, "or");
+        dict.put(BINOP.XOR, "xor");
+
+        // Now,  find which instruction we need and emit it
+        assem = dict.get(e.binop) + " `d0, `s1";
+        emit(new assem.OPER(assem,
                             new List<Temp>(left, null),
                             new List<Temp>(left, new List<Temp>(right, null))));
-        break;
+        return left;
+        //break;
 
       default:
         throw new Error("Unhandled BinOp: " + e.binop);
@@ -432,7 +371,7 @@ public class Codegen {
     } // End of swith
 
     // Always return left Temp
-    return left;
+    //return left;
   }
 
   /**
@@ -451,7 +390,7 @@ public class Codegen {
   private Temp munchCall(CALL e) {
     System.out.println("entrando em munchCall");
 
-    // Find the amount of params that will go to stack
+    // Find the amount of params that will go to the stack
     ArrayList<Exp> reversedParams = new ArrayList<tree.Exp>();
     int numArgs = 0;
 
@@ -461,16 +400,14 @@ public class Codegen {
     }
 
     // Put the params in stack, in reverse order.
-    // // Also, build the list of Temp params
-    //List<Temp> paramsTemp = null;
+    // Also, build the list of Temp params
+    List<Temp> paramsTemp = null;
     for (Exp param : reversedParams) {
       Temp p = munchExp(param);
-      //paramsTemp = new List<Temp>(p, paramsTemp);
+      paramsTemp = new List<Temp>(p, paramsTemp);
       emit(new assem.OPER("push `s0",
-                          //new List<Temp>(Frame.esp, null),
-                          //new List<Temp>(p, new List<Temp>(Frame.esp, null))));
-                          null,
-                          new List<Temp>(p, null)));
+                          new List<Temp>(Frame.esp, null),
+                          new List<Temp>(p, new List<Temp>(Frame.esp, null))));
     }
 
     String assem; // aux
@@ -480,29 +417,23 @@ public class Codegen {
       NAME n = (NAME) e.func;
       assem = String.format("call %s", n.label.toString());
       emit(new assem.OPER(assem,
-                          // new List<Temp>(Frame.esp, Frame.calldefs),
-                          // new List<Temp>(Frame.esp, paramsTemp)));
-                          Frame.calldefs,
-                          null));
+                          new List<Temp>(Frame.esp, Frame.calldefs),
+                          new List<Temp>(Frame.esp, paramsTemp)));
     }
     // Otherwise, it's necessary to process the call address
     else {
       Temp callAddress = munchExp(e.func);
       emit(new assem.OPER("call `s0",
-                          Frame.calldefs,
-                          new List<Temp>(callAddress, null)));
-                          // new List<Temp>(Frame.esp, Frame.calldefs),
-                          // new List<Temp>(callAddress, new List<Temp>(Frame.esp, paramsTemp))));
+                          new List<Temp>(Frame.esp, Frame.calldefs),
+                          new List<Temp>(callAddress, new List<Temp>(Frame.esp, paramsTemp))));
     }
 
     // Restore the stack
     if (numArgs != 0) {
       assem = String.format("add esp, %d", (4 * numArgs));
       emit(new assem.OPER(assem,
-                          null,
-                          null));
-                          // new List<Temp>(Frame.esp, null),
-                          // new List<Temp>(Frame.esp, null)));
+                          new List<Temp>(Frame.esp, null),
+                          new List<Temp>(Frame.esp, null)));
     }
 
     // Get the return value
@@ -523,29 +454,25 @@ public class Codegen {
       BINOP op = (BINOP) e.exp;
 
       // [ REG + CONST ]
-      if (op.binop == BINOP.PLUS) {
-        if (op.left instanceof TEMP && op.right instanceof CONST) {
-          TEMP t = (TEMP) op.left;
-          CONST c = (CONST) op.right;
-          String assem = String.format("mov `d0, [`s0 + %d]", c.value);
-          emit(new assem.OPER(assem,
-                              new List<Temp>(ret, null),
-                              new List<Temp>(t.temp, null)));
-          return ret;
-        }
+      if ((op.binop == BINOP.PLUS) && (op.left instanceof TEMP) && (op.right instanceof CONST)) {
+        TEMP t = (TEMP) op.left;
+        CONST c = (CONST) op.right;
+        String assem = String.format("mov `d0, [`s0 + %d]", c.value);
+        emit(new assem.OPER(assem,
+                            new List<Temp>(ret, null),
+                            new List<Temp>(t.temp, null)));
+        return ret;
       }
 
       // [ REG - CONST ]
-      else if (op.binop == BINOP.MINUS) {
-        if (op.left instanceof TEMP && op.right instanceof CONST) {
-          TEMP t = (TEMP) op.left;
-          CONST c = (CONST) op.right;
-          String assem = String.format("mov `d0, [`s0 - %d]", c.value);
-          emit(new assem.OPER(assem,
-                              new List<Temp>(ret, null),
-                              new List<Temp>(t.temp, null)));
-          return ret;
-        }
+      else if ((op.binop == BINOP.MINUS) && (op.left instanceof TEMP) && (op.right instanceof CONST)) {
+        TEMP t = (TEMP) op.left;
+        CONST c = (CONST) op.right;
+        String assem = String.format("mov `d0, [`s0 - %d]", c.value);
+        emit(new assem.OPER(assem,
+                            new List<Temp>(ret, null),
+                            new List<Temp>(t.temp, null)));
+        return ret;
       }
     }
 
