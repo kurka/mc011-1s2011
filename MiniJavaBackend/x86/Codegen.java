@@ -322,7 +322,7 @@ public class Codegen {
     Temp left = new Temp();
 
     //make the binop operation in two stages (see two address instructions in book's p 151)
-    emit(new assem.MOVE("`d0, `s0", left, tmp));
+    emit(new assem.MOVE("mov `d0, `s0", left, tmp));
 
 
     switch (e.binop) {
