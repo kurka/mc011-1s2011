@@ -453,15 +453,38 @@ public class Codegen {
     if (e.exp instanceof BINOP) {
       BINOP op = (BINOP) e.exp;
 
-      // [ REG + CONST ]
-      if ((op.binop == BINOP.PLUS) && (op.left instanceof TEMP) && (op.right instanceof CONST)) {
-        TEMP t = (TEMP) op.left;
-        CONST c = (CONST) op.right;
-        String assem = String.format("mov `d0, [`s0 + %d]", c.value);
-        emit(new assem.OPER(assem,
-                            new List<Temp>(ret, null),
-                            new List<Temp>(t.temp, null)));
-        return ret;
+      if (op.binop == BINOP.PLUS){
+        // [ REG + CONST ]
+        if((op.left instanceof TEMP) && (op.right instanceof CONST)) {
+          TEMP t = (TEMP) op.left;
+          CONST c = (CONST) op.right;
+          String assem = String.format("mov `d0, [`s0 + %d]", c.value);
+          emit(new assem.OPER(assem,
+                new List<Temp>(ret, null),
+                new List<Temp>(t.temp, null)));
+          return ret;
+        }
+        else if((op.left instanceof TEMP || op.left instanceof MEM) && op.right instanceof BINOP){
+          // [REG + X*REG]
+          BINOP op_shl = (BINOP) op.right;
+          Temp t = munchExp(op.left);
+          if (op_shl.binop == BINOP.LSHIFT) {
+            CONST c = (CONST) op_shl.right;
+            if (op_shl.left instanceof CONST) {
+              CONST op_shl_left = (CONST) op_shl.left;
+              emit(new assem.OPER("mov `d0, [`s0 + " + (int)Math.pow(2, c.value) * op_shl_left.value + "]",  
+                    new List<Temp>(ret, null),
+                    new List<Temp>(t, null)));
+            }
+            else {
+              Temp index = munchExp(op_shl.left);
+              emit(new assem.OPER("mov `d0, [`s0 + " + (int)Math.pow(2, c.value) + " * `s1]",  
+                    new List<Temp>(ret, null),
+                    new List<Temp>(t, new List<Temp>(index, null))));
+            }
+            return ret; 
+          }
+        }
       }
 
       // [ REG - CONST ]
@@ -470,8 +493,8 @@ public class Codegen {
         CONST c = (CONST) op.right;
         String assem = String.format("mov `d0, [`s0 - %d]", c.value);
         emit(new assem.OPER(assem,
-                            new List<Temp>(ret, null),
-                            new List<Temp>(t.temp, null)));
+              new List<Temp>(ret, null),
+              new List<Temp>(t.temp, null)));
         return ret;
       }
     }
@@ -479,8 +502,8 @@ public class Codegen {
     // Deal with common case
     Temp src = munchExp(e.exp);
     emit(new assem.OPER("mov `d0, [`s0]", 
-                        new List<Temp>(ret, null),
-                        new List<Temp>(src, null)));
+          new List<Temp>(ret, null),
+          new List<Temp>(src, null)));
     return ret;
   }
 
