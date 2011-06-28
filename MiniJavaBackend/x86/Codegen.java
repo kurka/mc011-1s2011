@@ -103,39 +103,27 @@ public class Codegen {
               new List<Temp>(t.temp, new List<Temp>(val, null))));
         return;
       }
-      if (op.binop == BINOP.PLUS){
-        // [ REG + CONST ]
-        if((op.left instanceof TEMP) && (op.right instanceof CONST)) {
-          TEMP t = (TEMP) op.left;
-          CONST c = (CONST) op.right;
-          assem = String.format("mov [`s0+%d], `s1", c.value);
-          emit(new assem.OPER(assem,
-                null,
-                new List<Temp>(t.temp, new List<Temp>(val, null))));
-          return;
-        }
-        // mov [REG + X*REG], REG
-        else if((op.left instanceof TEMP || op.left instanceof MEM) && op.right instanceof BINOP){
-          BINOP op_shl = (BINOP) op.right;
-          Temp t = munchExp(op.left);
-          if (op_shl.binop == BINOP.LSHIFT) {
-            CONST c = (CONST) op_shl.right;
-            if (op_shl.left instanceof CONST) {
-              CONST op_shl_left = (CONST) op_shl.left;
-              assem = String.format("mov [`s0+%d], `s1", (int)Math.pow(2,c.value)*op_shl_left.value);
-                  emit(new assem.OPER(assem,
-                      null,
-                      new List<Temp>(t, new List<Temp>(val, null))));
-                  }
-            else {
-              Temp index = munchExp(op_shl.left);
-              assem = String.format("mov [`s0+%d*`s1], `s2", (int)Math.pow(2,c.value));
-              emit(new assem.OPER(assem,
-                    null,
-                    new List<Temp>(t, new List<Temp>(index, new List<Temp>(val, null)))));
-            }
-            return; 
+      // mov [REG + X*REG], REG
+      else if((op.left instanceof TEMP || op.left instanceof MEM) && op.right instanceof BINOP){
+        BINOP op_shl = (BINOP) op.right;
+        Temp t = munchExp(op.left);
+        if (op_shl.binop == BINOP.LSHIFT) {
+          CONST c = (CONST) op_shl.right;
+          if (op_shl.left instanceof CONST) {
+            CONST op_shl_left = (CONST) op_shl.left;
+            assem = String.format("mov [`s0+%d], `s1", (int)Math.pow(2,c.value)*op_shl_left.value);
+            emit(new assem.OPER(assem,
+                  null,
+                  new List<Temp>(t, new List<Temp>(val, null))));
           }
+          else {
+            Temp index = munchExp(op_shl.left);
+            assem = String.format("mov [`s0+%d*`s1], `s2", (int)Math.pow(2,c.value));
+            emit(new assem.OPER(assem,
+                  null,
+                  new List<Temp>(t, new List<Temp>(index, new List<Temp>(val, null)))));
+          }
+          return; 
         }
       }
       else if ((op.binop == BINOP.MINUS) && (op.left instanceof TEMP) && (op.right instanceof CONST)) {
@@ -153,8 +141,8 @@ public class Codegen {
     Temp address = munchExp(d.exp);
 
     emit(new assem.OPER("mov [`s0], `s1",
-                        null,
-                        new List<Temp>(address, new List<Temp>(val, null))));
+          null,
+          new List<Temp>(address, new List<Temp>(val, null))));
     System.out.println("saindo de munchMoveMem");
   }
 
@@ -211,7 +199,7 @@ public class Codegen {
     emit(new assem.OPER(instr + " `j0",
                         null,
                         null,
-                        new List<Label>(s.ifTrue, null)));
+                        new List<Label>(s.ifTrue,null)));
     System.out.println("saindo de munchCjump");
   }
 
