@@ -199,7 +199,7 @@ public class Codegen {
     emit(new assem.OPER(instr + " `j0",
                         null,
                         null,
-                        new List<Label>(s.ifTrue,null)));
+                        new List<Label>(s.ifTrue, new List<Label>(s.ifFalse, null)));
     System.out.println("saindo de munchCjump");
   }
 
