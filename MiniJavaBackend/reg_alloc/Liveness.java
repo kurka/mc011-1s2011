@@ -108,7 +108,6 @@ public class Liveness extends InterferenceGraph
         for ( List<Node> aux = graph.nodes(); aux != null; aux = aux.tail )
         {
             nodes.add(0, aux.head);
-            //System.out.println(nodes.toString());
             in.put(aux.head, new HashSet<Temp>());
             out.put(aux.head, new HashSet<Temp>());
         }
@@ -145,9 +144,6 @@ public class Liveness extends InterferenceGraph
             }            
  
         } while (check_ins() == false || check_outs() == false);
-        System.out.println("Saiu");
-        //dump(System.err);
-        //graph.show(System.out);
     }
     
     private Boolean check_ins() {
@@ -155,11 +151,9 @@ public class Liveness extends InterferenceGraph
         Hashtable<Node, HashSet<Temp>> b = inprime;
         // Primeiro testa se ambas hashtables tem as mesmas chaves.
         if (b.keySet().containsAll(a.keySet()) == false) {
-            // System.out.println("Chaves de in e inprime estão diferentes.");
             return false;
         }
         if (a.keySet().containsAll(b.keySet()) == false) {
-            // System.out.println("Chaves de in e inprime estão diferentes.");
             return false;
         }
 
@@ -167,11 +161,9 @@ public class Liveness extends InterferenceGraph
         // Se sim, é porque n mapeia para o mesmo conjunto
         for (Node n : a.keySet()) {
             if (a.get(n).containsAll(b.get(n)) == false) {
-                // System.out.println("Conjuntos de in[" + n + "] e inprime[" + n + "] diferem.");
                 return false;
             }
             if (b.get(n).containsAll(a.get(n)) == false) {
-                // System.out.println("Conjuntos de in[" + n + "] e inprime[" + n + "] diferem.");
                 return false;
             }
         }
@@ -183,11 +175,9 @@ public class Liveness extends InterferenceGraph
         Hashtable<Node, HashSet<Temp>> b = outprime;
             // Primeiro testa se ambas hashtables tem as mesmas chaves.
             if (b.keySet().containsAll(a.keySet()) == false) {
-                // System.out.println("Chaves de out e outprime estão diferentes.");
                 return false;
             }
             if (a.keySet().containsAll(b.keySet()) == false) {
-                // System.out.println("Chaves de out e outprime estão diferentes.");
                 return false;
             }
 
@@ -195,11 +185,9 @@ public class Liveness extends InterferenceGraph
         // Se sim, é porque n mapeia para o mesmo conjunto
         for (Node n : a.keySet()) {
             if (a.get(n).containsAll(b.get(n)) == false) {
-                // System.out.println("Conjuntos de out[" + n + "] e outprime[" + n + "] diferem.");
                 return false;
             }
             if (b.get(n).containsAll(a.get(n)) == false) {
-                // System.out.println("Conjuntos de out[" + n + "] e outprime[" + n + "] diferem.");
                 return false;
             }
         }
