@@ -9,10 +9,16 @@ class B {
   public int func() {
     
     int i;
-    i = 1;
+	int j;
+    i = 5;
+	j = 6;
 
-    i = i + 1;
-    i = 1 + i;
+	i = i + 1;
+    j = i + 1;
+    j = 1 + i;
+	System.out.println(j);
+	System.out.println(i);
+
     return i;
   }
 }

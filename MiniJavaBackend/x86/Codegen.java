@@ -281,14 +281,11 @@ public class Codegen {
     HashMap<Integer,String> dict; //aux
     String assem; //aux String to build assembly code
     Temp right;
+    Temp left;
+    Temp tmp;
     CONST c;
     
     
-    Temp tmp = munchExp(e.left);
-    Temp left = new Temp();
-
-    //make the binop operation in two stages (see two address instructions in book's p 151)
-    emit(new assem.MOVE("mov `d0, `s0", left, tmp));
 
 
     switch (e.binop) {
@@ -297,82 +294,126 @@ public class Codegen {
        * PLUS
        */
 		case BINOP.PLUS:
+			
 			// ADD REG, IMMED
 			if (e.right instanceof CONST) {
-				c = (CONST) e.right;
-				if(c.value == 1){
-					emit(new assem.OPER("inc `d0",
-								new List<Temp>(left, null),
-								new List<Temp>(left, null)));
+              tmp = munchExp(e.left);
+              left = new Temp();
+
+              //make the binop operation in two stages (see two address instructions in book's p 151)
+              emit(new assem.MOVE("mov `d0, `s0", left, tmp));
+              c = (CONST) e.right;
+              if(c.value == 1){
+                emit(new assem.OPER("inc `d0",
+                      new List<Temp>(left, null),
+                      new List<Temp>(left, null)));
+              }
+              else{
+                assem = String.format("add `d0, %d", c.value);
+                emit(new assem.OPER(assem,
+                      new List<Temp>(left, null),
+                      new List<Temp>(left, null)));
+              }
+              return left;
+            }
+            // ADD IMMED, REG
+            if (e.left instanceof CONST) {
+              tmp = munchExp(e.right);
+              right = new Temp();
+
+              //make the binop operation in two stages (see two address instructions in book's p 151)
+              emit(new assem.MOVE("mov `d0, `s0", right, tmp));
+              c = (CONST) e.left;
+              if(c.value == 1){
+                emit(new assem.OPER("inc `d0",
+                      new List<Temp>(right, null),
+								new List<Temp>(right, null)));
 				}
 				else{
 					assem = String.format("add `d0, %d", c.value);
 					emit(new assem.OPER(assem,
-								new List<Temp>(left, null),
-								new List<Temp>(left, null)));
+								new List<Temp>(right, null),
+								new List<Temp>(right, null)));
 				}
-				return left;
+				return right;
 			}
 			// ADD REG, REG
-			else {
-				right = munchExp(e.right);
-				emit(new assem.OPER("add `d0, `s1",
-							new List<Temp>(left, null),
-							new List<Temp>(left, new List<Temp>(right, null))));
-				return left;
-			}
+            else {
+              tmp = munchExp(e.left);
+              left = new Temp();
+
+              //make the binop operation in two stages (see two address instructions in book's p 151)
+              emit(new assem.MOVE("mov `d0, `s0", left, tmp));
+              
+              right = munchExp(e.right);
+              emit(new assem.OPER("add `d0, `s1",
+                    new List<Temp>(left, null),
+                    new List<Temp>(left, new List<Temp>(right, null))));
+              return left;
+            }
 
       /**
        * LSHIFT and RSHIFT
        */
-      case BINOP.LSHIFT:
-      case BINOP.RSHIFT:
+        case BINOP.LSHIFT:
+        case BINOP.RSHIFT:
+            tmp = munchExp(e.left);
+            left = new Temp();
 
-        c = (CONST) e.right;
+            //make the binop operation in two stages (see two address instructions in book's p 151)
+            emit(new assem.MOVE("mov `d0, `s0", left, tmp));
 
-        // Build a dictionary to relate BINOP type and x86 instruction.
-        dict = new HashMap<Integer, String>();
-        dict.put(BINOP.LSHIFT, "shl");
-        dict.put(BINOP.RSHIFT, "shr");
+            c = (CONST) e.right;
 
-        // Now, find which instruction we need and emit it
-        assem = dict.get(e.binop) + " `d0, " + c.value;
-        emit(new assem.OPER(assem,
-                            new List<Temp>(left, null),
-                            new List<Temp>(left, null)));
-        return left;
-        //break;
+            // Build a dictionary to relate BINOP type and x86 instruction.
+            dict = new HashMap<Integer, String>();
+            dict.put(BINOP.LSHIFT, "shl");
+            dict.put(BINOP.RSHIFT, "shr");
+
+            // Now, find which instruction we need and emit it
+            assem = dict.get(e.binop) + " `d0, " + c.value;
+            emit(new assem.OPER(assem,
+                  new List<Temp>(left, null),
+                  new List<Temp>(left, null)));
+            return left;
+            //break;
 
       /**
        * OTHERS
        */
-      case BINOP.MINUS:
-      case BINOP.TIMES:
-      case BINOP.AND:
-      case BINOP.OR:
-      case BINOP.XOR:
+        case BINOP.MINUS:
+        case BINOP.TIMES:
+        case BINOP.AND:
+        case BINOP.OR:
+        case BINOP.XOR:
 
-        // Calculate right value
-        right = munchExp(e.right);
+            tmp = munchExp(e.left);
+            left = new Temp();
 
-        // Build a dictionary to relate BINOP type and x86 instruction.
-        dict = new HashMap<Integer, String>();
-        dict.put(BINOP.MINUS, "sub");
-        dict.put(BINOP.TIMES, "imul");
-        dict.put(BINOP.AND, "and");
-        dict.put(BINOP.OR, "or");
-        dict.put(BINOP.XOR, "xor");
+            //make the binop operation in two stages (see two address instructions in book's p 151)
+            emit(new assem.MOVE("mov `d0, `s0", left, tmp));
 
-        // Now,  find which instruction we need and emit it
-        assem = dict.get(e.binop) + " `d0, `s1";
-        emit(new assem.OPER(assem,
-                            new List<Temp>(left, null),
-                            new List<Temp>(left, new List<Temp>(right, null))));
-        return left;
-        //break;
+            // Calculate right value
+            right = munchExp(e.right);
 
-      default:
-        throw new Error("Unhandled BinOp: " + e.binop);
+            // Build a dictionary to relate BINOP type and x86 instruction.
+            dict = new HashMap<Integer, String>();
+            dict.put(BINOP.MINUS, "sub");
+            dict.put(BINOP.TIMES, "imul");
+            dict.put(BINOP.AND, "and");
+            dict.put(BINOP.OR, "or");
+            dict.put(BINOP.XOR, "xor");
+
+            // Now,  find which instruction we need and emit it
+            assem = dict.get(e.binop) + " `d0, `s1";
+            emit(new assem.OPER(assem,
+                  new List<Temp>(left, null),
+                  new List<Temp>(left, new List<Temp>(right, null))));
+            return left;
+            //break;
+
+        default:
+            throw new Error("Unhandled BinOp: " + e.binop);
 
     } // End of swith
 
