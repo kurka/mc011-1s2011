@@ -296,24 +296,31 @@ public class Codegen {
       /**
        * PLUS
        */
-      case BINOP.PLUS:
-        // ADD REG, IMMED
-        if (e.right instanceof CONST) {
-          c = (CONST) e.right;
-          assem = String.format("add `d0, %d", c.value);
-          emit(new assem.OPER(assem,
-                              new List<Temp>(left, null),
-                              new List<Temp>(left, null)));
-          return left;
-        }
-        // ADD REG, REG
-        else {
-          right = munchExp(e.right);
-          emit(new assem.OPER("add `d0, `s1",
-                              new List<Temp>(left, null),
-                              new List<Temp>(left, new List<Temp>(right, null))));
-          return left;
-        }
+		case BINOP.PLUS:
+			// ADD REG, IMMED
+			if (e.right instanceof CONST) {
+				c = (CONST) e.right;
+				if(c.value == 1){
+					emit(new assem.OPER("inc `d0",
+								new List<Temp>(left, null),
+								new List<Temp>(left, null)));
+				}
+				else{
+					assem = String.format("add `d0, %d", c.value);
+					emit(new assem.OPER(assem,
+								new List<Temp>(left, null),
+								new List<Temp>(left, null)));
+				}
+				return left;
+			}
+			// ADD REG, REG
+			else {
+				right = munchExp(e.right);
+				emit(new assem.OPER("add `d0, `s1",
+							new List<Temp>(left, null),
+							new List<Temp>(left, new List<Temp>(right, null))));
+				return left;
+			}
 
       /**
        * LSHIFT and RSHIFT
