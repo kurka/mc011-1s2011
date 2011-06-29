@@ -1,0 +1,62 @@
+#!/bin/bash
+
+USAGE="usage: ./pp3 <pasta> <etapa>"
+
+# check if arg1 is present and is directory
+if [ $# -ne 2 ]
+then
+  echo $USAGE
+  exit
+fi
+
+if [ ! -d $1 ]
+then
+  echo $USAGE
+  exit
+fi
+
+if [ $2 -lt 0 ]
+then
+  echo $USAGE
+  exit
+fi
+
+IN=$1/in$2
+OUT=$1/g04/out$2
+TIMEFILE=$OUT/g04.time
+
+# Check if OUT dir exists. If not, create it.
+if [ ! -d $1/g04 ]
+then
+  mkdir $1/g04
+fi
+
+# Check if OUT dir exists. If not, create it.
+if [ ! -d $OUT ]
+then
+  mkdir $OUT
+fi
+
+rm --force $TIMEFILE
+
+for i in `ls $IN/*.java`
+do
+  PROG=${i##*/}
+  PROG=${PROG%.java}
+
+  echo $PROG...
+
+  # Compile program
+  rm --force minijava.asm
+  java main.Main < $IN/$PROG.java
+  nasm -felf minijava.asm
+  gcc -march=i386 -m32 -c runtime/runtime.c
+  gcc -march=i386 -m32 minijava.o runtime.o -o mc011
+
+  # Run program and save elapsed time on file
+  # TODO
+
+  # Move ASM and BINARY files to OUT dir.
+  mv minijava.asm  $OUT/$PROG.asm
+  mv mc011 $OUT/$PROG
+done
